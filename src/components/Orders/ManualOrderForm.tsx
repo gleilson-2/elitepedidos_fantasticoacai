@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Minus, ShoppingCart, User, Phone, MapPin, Package, Check } from 'lucide-react';
+import { useOrders } from '../../hooks/useOrders';
 import { usePDVCashRegister } from '../../hooks/usePDVCashRegister';
 import { useNeighborhoods } from '../../hooks/useNeighborhoods';
-import { useOrders } from '../../hooks/useOrders';
 import DeliveryTypeSelector from '../Delivery/DeliveryTypeSelector';
 import PickupScheduler from '../Delivery/PickupScheduler';
 import { products } from '../../data/products';
@@ -19,7 +18,8 @@ import {
   ShoppingBag,
   Search,
   X,
-  AlertCircle
+  AlertCircle,
+  Check
 } from 'lucide-react';
 
 interface ManualOrderFormProps {
@@ -58,6 +58,7 @@ const ManualOrderForm: React.FC<ManualOrderFormProps> = ({ onClose, onOrderCreat
   const [quantity, setQuantity] = useState(1);
   const [observations, setObservations] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedComplements, setSelectedComplements] = useState<Array<{ groupId: string; complementId: string }>>([]);
   
   // Filter products based on search term
   const filteredProducts = searchTerm
@@ -83,6 +84,25 @@ const ManualOrderForm: React.FC<ManualOrderFormProps> = ({ onClose, onOrderCreat
   const getEstimatedDeliveryTime = () => {
     const neighborhood = neighborhoods.find(n => n.name === customerNeighborhood);
     return neighborhood ? neighborhood.delivery_time : 50;
+  };
+  
+  // Handle complement selection
+  const handleComplementChange = (group: any, complementId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedComplements(prev => [...prev, { groupId: group.id, complementId }]);
+    } else {
+      setSelectedComplements(prev => prev.filter(
+        sc => !(sc.groupId === group.id && sc.complementId === complementId)
+      ));
+    }
+  };
+  
+  // Handle radio complement selection
+  const handleRadioComplementChange = (group: any, complementId: string) => {
+    setSelectedComplements(prev => [
+      ...prev.filter(sc => sc.groupId !== group.id),
+      { groupId: group.id, complementId }
+    ]);
   };
   
   // Add product to order
