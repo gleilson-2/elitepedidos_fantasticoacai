@@ -1,14 +1,20 @@
 import React from 'react';
 import { Clock, User, DollarSign, ArrowDownCircle, ArrowUpCircle, AlertCircle, RefreshCw, Plus, Minus, Info } from 'lucide-react';
 import { PDVCashRegister, PDVCashRegisterSummary } from '../../types/pdv';
+import { usePermissions } from '../../hooks/usePermissions';
 
 interface CashRegisterDetailsProps {
   register: PDVCashRegister | null;
   summary: PDVCashRegisterSummary;
   onRefresh?: () => void;
+  operator?: any;
 }
 
-const CashRegisterDetails: React.FC<CashRegisterDetailsProps> = ({ register, summary, onRefresh }) => {
+const CashRegisterDetails: React.FC<CashRegisterDetailsProps> = ({ register, summary, onRefresh, operator }) => {
+  const { hasPermission } = usePermissions(operator);
+  const canViewExpectedBalance = hasPermission('can_view_expected_balance');
+  const canViewCashBalance = hasPermission('can_view_cash_balance');
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -222,7 +228,7 @@ const CashRegisterDetails: React.FC<CashRegisterDetailsProps> = ({ register, sum
                 <span className="text-xs text-gray-500 ml-1 hidden sm:inline">(Todas formas de pagamento)</span>
               </p>
               <p className="font-medium text-green-600">
-                {formatPrice(summary.sales_total)}
+                {canViewCashBalance ? formatPrice(summary.sales_total) : '••••••'}
               </p>
             </div>
             
@@ -233,7 +239,7 @@ const CashRegisterDetails: React.FC<CashRegisterDetailsProps> = ({ register, sum
                 <span className="text-xs text-gray-500 ml-1 hidden sm:inline">(Todas formas de pagamento)</span>
               </p>
               <p className="font-medium text-green-600">
-                {formatPrice(summary.delivery_total)}
+                {canViewCashBalance ? formatPrice(summary.delivery_total) : '••••••'}
               </p>
             </div>
             
@@ -244,7 +250,7 @@ const CashRegisterDetails: React.FC<CashRegisterDetailsProps> = ({ register, sum
                 <span className="text-xs text-gray-500 ml-1 hidden sm:inline">(Entradas manuais)</span>
               </p>
               <p className="font-medium text-green-600">
-                {formatPrice(summary.other_income_total)}
+                {canViewCashBalance ? formatPrice(summary.other_income_total) : '••••••'}
               </p>
             </div>
             
@@ -255,14 +261,14 @@ const CashRegisterDetails: React.FC<CashRegisterDetailsProps> = ({ register, sum
                 <span className="text-xs text-gray-500 ml-1 hidden sm:inline">(Despesas)</span>
               </p>
               <p className="font-medium text-red-600">
-                {formatPrice(summary.total_expense)}
+                {canViewCashBalance ? formatPrice(summary.total_expense) : '••••••'}
               </p>
             </div>
             
             <div className="flex justify-between pt-1 border-t border-gray-200">
               <p className="text-sm font-medium text-gray-700">Saldo Esperado</p>
               <p className="font-bold text-green-600" title="Valor de abertura + entradas em dinheiro - saídas">
-                {formatPrice(summary.expected_balance)}
+                {canViewExpectedBalance ? formatPrice(summary.expected_balance) : '••••••'}
               </p>
             </div>
             <div className="flex justify-between pt-1 text-xs text-gray-500">
@@ -285,25 +291,25 @@ const CashRegisterDetails: React.FC<CashRegisterDetailsProps> = ({ register, sum
             <div className="flex justify-between">
               <p className="text-sm text-gray-600">Vendas PDV:</p>
               <p className="font-medium text-green-600" title="Total de vendas no PDV (todas formas de pagamento)">
-                {formatPrice(summary.sales_total || 0)}
+                {canViewCashBalance ? formatPrice(summary.sales_total || 0) : '••••••'}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-sm text-gray-600">Vendas Delivery:</p>
               <p className="font-medium text-green-600" title="Total de vendas no Delivery (todas formas de pagamento)">
-                {formatPrice(summary.delivery_total || 0)}
+                {canViewCashBalance ? formatPrice(summary.delivery_total || 0) : '••••••'}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-sm text-gray-600">Outras Entradas:</p>
               <p className="font-medium text-green-600" title="Entradas manuais (não relacionadas a vendas)">
-                {formatPrice(summary.other_income_total || 0)}
+                {canViewCashBalance ? formatPrice(summary.other_income_total || 0) : '••••••'}
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-sm text-gray-600">Saídas:</p>
               <p className="font-medium text-red-600" title="Despesas e retiradas">
-                {formatPrice(summary.total_expense || 0)}
+                {canViewCashBalance ? formatPrice(summary.total_expense || 0) : '••••••'}
               </p>
             </div>
           </div>

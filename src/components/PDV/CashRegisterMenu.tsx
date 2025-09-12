@@ -681,6 +681,7 @@ const CashRegisterMenu: React.FC<CashRegisterMenuProps> = ({ isAdmin = false, op
                 <div className="text-center py-12">
                   <DollarSign size={48} className="mx-auto text-gray-300 mb-4" />
                   <p className="text-gray-500">Nenhuma movimentação registrada</p>
+                  operator={operator}
                 </div>
               )}
             </div>
