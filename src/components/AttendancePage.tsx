@@ -33,6 +33,7 @@ const AttendancePage: React.FC = () => {
       code: attendanceUser.username.toUpperCase(),
       password_hash: attendanceUser.password_hash,
       is_active: attendanceUser.is_active,
+      role: attendanceUser.role || 'attendant', // Adicionar campo role
       permissions: {
         can_cancel: attendanceUser.permissions?.can_cancel || false,
         can_discount: attendanceUser.permissions?.can_discount || false,
