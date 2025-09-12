@@ -50,7 +50,9 @@ const AttendanceUsersPanel: React.FC = () => {
       can_view_orders: true,
       can_print_orders: true,
       can_update_status: true,
-      can_create_manual_orders: false
+      can_create_manual_orders: false,
+      can_view_tables: false,
+      can_view_history: false
     }
   });
 
@@ -465,34 +467,433 @@ const AttendanceUsersPanel: React.FC = () => {
                     />
                     <span className="text-sm text-gray-700">Criar pedidos manuais</span>
                   </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_cash_register}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_cash_register: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_open_cash_register}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_open_cash_register: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Abrir caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_close_cash_register}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_close_cash_register: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Fechar caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_manage_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_manage_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Gerenciar movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_add_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_add_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Adicionar movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_edit_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_edit_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Editar movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_delete_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_delete_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Excluir movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_cancel_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_cancel_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Cancelar movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_cash_register}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_cash_register: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_open_cash_register}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_open_cash_register: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Abrir caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_close_cash_register}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_close_cash_register: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Fechar caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_manage_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_manage_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Gerenciar movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_add_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_add_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Adicionar movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_edit_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_edit_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Editar movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_delete_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_delete_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Excluir movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_cancel_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_cancel_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Cancelar movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_cash_register}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_cash_register: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_open_cash_register}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_open_cash_register: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Abrir caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_close_cash_register}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_close_cash_register: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Fechar caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_manage_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_manage_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Gerenciar movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_add_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_add_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Adicionar movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_edit_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_edit_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Editar movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_delete_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_delete_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Excluir movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_reports}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_reports: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar relatórios</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_cash_report}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_cash_report: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Relatório de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_sales_report}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_sales_report: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Relatório de vendas</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_manage_products}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_manage_products: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Gerenciar produtos</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_operators}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_operators: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar operadores</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_attendance}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_attendance: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar atendimento</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_manage_settings}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_manage_settings: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Gerenciar configurações</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_use_scale}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_use_scale: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Usar balança</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_discount}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_discount: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Aplicar descontos</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_cancel}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_cancel: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Cancelar vendas</span>
+                  </label>
                 </div>
-              </div>
-
-              <div className="flex gap-4 pt-6 border-t border-gray-200">
-                <button
-                  type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                >
-                  <Save size={20} />
-                  {editingUser ? 'Atualizar Usuário' : 'Criar Usuário'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    resetForm();
-                  }}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default AttendanceUsersPanel;
