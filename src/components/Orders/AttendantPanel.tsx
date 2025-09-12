@@ -6,7 +6,6 @@ import PermissionGuard from '../PermissionGuard';
 import OrderPrintView from './OrderPrintView';
 import ManualOrderForm from './ManualOrderForm';
 import OrderCard from './OrderCard';
-import ManualOrderForm from './ManualOrderForm';
 import ThermalPrinterSetup from '../PDV/ThermalPrinterSetup';
 import { OrderStatus } from '../../types/order';
 import { 
