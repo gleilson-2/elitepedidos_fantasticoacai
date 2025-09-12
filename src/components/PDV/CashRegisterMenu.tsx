@@ -790,9 +790,21 @@ const CashRegisterMenu: React.FC<CashRegisterMenuProps> = ({ isAdmin = false, op
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <div className="text-sm text-blue-700">
-                        <p className="font-medium">Permissão Limitada</p>
-                        <p>Como atendente, você pode editar apenas a forma de pagamento desta movimentação.</p>
-                      </div>
+                      {hasPermission('can_view_cash_balance') ? (
+                        <p className="text-2xl font-bold text-blue-700">
+                          {formatPrice(summary.opening_amount + summary.sales_total + summary.delivery_total + summary.other_income_total - summary.total_expense)}
+                        </p>
+                      ) : (
+                        <p className="text-2xl font-bold text-gray-400">
+                      {hasPermission('can_view_cash_balance') ? (
+                        <p className="text-2xl font-bold text-green-700">
+                          {formatPrice(summary.expected_balance)}
+                        </p>
+                      ) : (
+                        <p className="text-2xl font-bold text-gray-400">
+                          ••••••
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}
