@@ -471,7 +471,7 @@ const AttendanceUsersPanel: React.FC = () => {
               <div className="flex gap-4 pt-6 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   <Save size={20} />
                   {editingUser ? 'Atualizar Usuário' : 'Criar Usuário'}
