@@ -65,6 +65,7 @@ const CashRegisterMenu: React.FC<CashRegisterMenuProps> = ({ isAdmin = false, op
   const [entryPaymentMethod, setEntryPaymentMethod] = useState('dinheiro');
   const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
   const [showCloseDialog, setShowCloseDialog] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [showPrintView, setShowPrintView] = useState(false);
   const [editingEntry, setEditingEntry] = useState<any>(null);
   const [showEditModal, setShowEditModal] = useState(false);
