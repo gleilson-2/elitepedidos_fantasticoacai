@@ -484,7 +484,7 @@ export const useAttendance = () => {
             .select('*')
             .eq('username', username)
             .eq('is_active', true)
-            .single();
+            .maybeSingle();
           
           if (!error && dbUser && dbUser.password_hash === password) {
             console.log('✅ Usuário encontrado no banco com permissões atualizadas:', {
