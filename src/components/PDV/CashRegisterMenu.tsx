@@ -1120,7 +1120,7 @@ const CashRegisterMenu: React.FC<CashRegisterMenuProps> = ({ isAdmin = false, op
           </div>
         )}
       </div>
-    </PermissionGuard>
+
       {/* Cash Register Details Modal */}
       {showDetails && currentRegister && (
         <CashRegisterDetails
@@ -1131,7 +1131,7 @@ const CashRegisterMenu: React.FC<CashRegisterMenuProps> = ({ isAdmin = false, op
           operator={operator}
         />
       )}
-
+    </PermissionGuard>
   );
 };
 
