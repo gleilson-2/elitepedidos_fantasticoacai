@@ -797,7 +797,7 @@ function UnifiedAttendancePage({ operator, storeSettings, scaleHook, onLogout }:
               </button>
             )}
           </div>
-            {(isAdmin || hasPermission('can_view_sales') || hasPermission('can_view_sales_report')) && (
+        </div>
 
         {/* 🚨 ALERTA GLOBAL DE NOVO PEDIDO - APARECE EM TODAS AS ABAS */}
         {newOrderAlert && (
