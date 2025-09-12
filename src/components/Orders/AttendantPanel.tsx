@@ -22,7 +22,6 @@ import {
   Plus,
   Printer
 } from 'lucide-react';
-import ManualOrderForm from './ManualOrderForm';
 
 interface AttendantPanelProps {
   onBackToAdmin?: () => void;
