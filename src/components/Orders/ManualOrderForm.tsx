@@ -158,6 +158,11 @@ const ManualOrderForm: React.FC<ManualOrderFormProps> = ({ onClose, onOrderCreat
     }));
   };
   
+
+  // Helper function to get selection count for a group
+  const getGroupSelectionCount = (groupId: string) => {
+    return selectedComplements.filter(s => s.groupId === groupId).length;
+  };
   // Format price
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
