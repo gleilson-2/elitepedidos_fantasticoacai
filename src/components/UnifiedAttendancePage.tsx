@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Plus, Edit, Trash2, Save, X, Eye, EyeOff, Shield, UserCheck } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 interface AttendanceUser {
   id: string;
@@ -471,10 +471,10 @@ const AttendanceUsersPanel: React.FC = () => {
               <div className="flex gap-4 pt-6 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   <Save size={20} />
-                  {editingUser ? 'Atualizar Usuário' : 'Criar Usuário'}
+                  {editingUser ? 'Atualizar' : 'Criar'} Usuário
                 </button>
                 <button
                   type="button"
