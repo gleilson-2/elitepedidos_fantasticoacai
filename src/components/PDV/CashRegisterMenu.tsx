@@ -37,7 +37,7 @@ interface CashRegisterMenuProps {
 }
 
 const CashRegisterMenu: React.FC<CashRegisterMenuProps> = ({ isAdmin = false, operator }) => {
-  const { hasPermission } = usePermissions();
+  const { hasPermission } = usePermissions(operator);
   const { session } = useAttendance();
   const {
     isOpen,
@@ -88,6 +88,23 @@ const CashRegisterMenu: React.FC<CashRegisterMenuProps> = ({ isAdmin = false, op
   const canDeleteEntries = isAdmin || 
                           (currentUser && currentUser.permissions?.can_delete_cash_entries) ||
                           hasPermission('can_delete_cash_entries');
+
+  // Debug das permissões
+  useEffect(() => {
+    console.log('🔍 CashRegisterMenu - Operador e permissões:', {
+      operatorName: operator?.name,
+      operatorCode: operator?.code,
+      canViewCashBalance: hasPermission('can_view_cash_balance'),
+      canViewExpectedBalance: hasPermission('can_view_expected_balance'),
+      allPermissions: operator?.permissions ? Object.entries(operator.permissions)
+        .filter(([_, value]) => value)
+        .map(([key, _]) => key) : 'No permissions'
+    });
+  }, [operator, hasPermission]);
+
+  // Verificar permissões específicas
+  const canViewCashBalance = hasPermission('can_view_cash_balance');
+  const canViewExpectedBalance = hasPermission('can_view_expected_balance');
 
   console.log('🔍 CashRegisterMenu - Verificação de permissões:', {
     operator: operator ? { name: operator.name, code: operator.code } : 'No operator',
@@ -150,8 +167,22 @@ const CashRegisterMenu: React.FC<CashRegisterMenuProps> = ({ isAdmin = false, op
     }, 0);
   };
 
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(price);
+  };
+
+  const formatSensitiveValue = (value: number, hasPermission: boolean) => {
+    return hasPermission ? formatPrice(value) : '••••••';
+  };
+
   const handleOpenRegister = async () => {
-    if (!openingAmount) return;
+    if (!openingAmount || openingAmount <= 0) {
+      alert('Digite um valor válido para abertura do caixa');
+      return;
+    }
     
     console.log('🚀 Abrindo caixa com valor:', parseFloat(openingAmount));
     try {
@@ -470,7 +501,7 @@ const CashRegisterMenu: React.FC<CashRegisterMenuProps> = ({ isAdmin = false, op
                   <div>
                     <p className="text-sm font-medium text-gray-600">Saldo Atual</p>
                     <p className="text-lg font-semibold text-purple-600" title="Saldo esperado em dinheiro">
-                      {formatPrice(summary.expected_balance)}
+                      {formatSensitiveValue(summary.expected_balance, canViewCashBalance)}
                     </p>
                   </div>
                   <div className="p-2 rounded-full bg-purple-100">
