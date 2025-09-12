@@ -98,7 +98,7 @@ const AttendanceUsersPanel: React.FC = () => {
         can_create_manual_orders: false,
         can_view_tables: false,
         can_view_history: false,
-        can_view_expected_balance: false
+        can_view_expected_balance: false,
         can_view_cash_balance: true
       }
     });
