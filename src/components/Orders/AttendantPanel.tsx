@@ -4,7 +4,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { useThermalPrinter } from '../../hooks/useThermalPrinter';
 import PermissionGuard from '../PermissionGuard';
 import OrderPrintView from './OrderPrintView';
-import ManualOrderForm from './ManualOrderForm';
+import ManualOrderForm from '../ManualOrderForm';
 import OrderCard from './OrderCard';
 import ManualOrderForm from './ManualOrderForm';
 import ThermalPrinterSetup from '../PDV/ThermalPrinterSetup';
