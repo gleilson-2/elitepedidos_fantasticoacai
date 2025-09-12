@@ -90,13 +90,6 @@ const AttendanceUsersPanel: React.FC = () => {
         can_print_orders: true,
         can_update_status: true,
         can_create_manual_orders: false
-        can_edit_orders: false,
-        can_delete_orders: false,
-        can_cancel_orders: false,
-        can_manage_cash_entries: false,
-        can_edit_cash_entries: false,
-        can_delete_cash_entries: false,
-        can_cancel_cash_entries: false
       }
     });
     setEditingUser(null);
@@ -787,96 +780,6 @@ const AttendanceUsersPanel: React.FC = () => {
                     <span className="text-sm text-gray-700">Visualizar histórico</span>
                   </label>
                 </div>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.permissions.can_edit_orders}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        permissions: { ...prev.permissions, can_edit_orders: e.target.checked }
-                      }))}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">Editar pedidos</span>
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.permissions.can_delete_orders}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        permissions: { ...prev.permissions, can_delete_orders: e.target.checked }
-                      }))}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">Excluir pedidos</span>
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.permissions.can_cancel_orders}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        permissions: { ...prev.permissions, can_cancel_orders: e.target.checked }
-                      }))}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">Cancelar pedidos</span>
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.permissions.can_manage_cash_entries}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        permissions: { ...prev.permissions, can_manage_cash_entries: e.target.checked }
-                      }))}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">Gerenciar movimentações de caixa</span>
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.permissions.can_edit_cash_entries}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        permissions: { ...prev.permissions, can_edit_cash_entries: e.target.checked }
-                      }))}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">Editar movimentações de caixa</span>
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.permissions.can_delete_cash_entries}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        permissions: { ...prev.permissions, can_delete_cash_entries: e.target.checked }
-                      }))}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">Excluir movimentações de caixa</span>
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.permissions.can_cancel_cash_entries}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        permissions: { ...prev.permissions, can_cancel_cash_entries: e.target.checked }
-                      }))}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">Cancelar movimentações de caixa</span>
-                  </label>
               </div>
 
               <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
