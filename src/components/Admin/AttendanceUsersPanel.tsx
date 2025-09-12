@@ -424,19 +424,6 @@ const AttendanceUsersPanel: React.FC = () => {
                   <label className="flex items-center gap-2">
                     <input
                       type="checkbox"
-                      checked={formData.permissions.can_view_expected_balance}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        permissions: { ...prev.permissions, can_view_expected_balance: e.target.checked }
-                      }))}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">Visualizar saldo esperado</span>
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
                       checked={formData.permissions.can_view_cash_details}
                       onChange={(e) => setFormData(prev => ({
                         ...prev,
@@ -473,6 +460,18 @@ const AttendanceUsersPanel: React.FC = () => {
                     <span className="text-sm text-gray-700">Visualizar movimentações de caixa</span>
                   </label>
 
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_expected_balance}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_expected_balance: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar saldo esperado</span>
+                  </label>
 
               {/* Permissions */}
               <div>
