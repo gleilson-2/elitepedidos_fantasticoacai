@@ -14,6 +14,8 @@ interface AttendanceUser {
     can_print_orders: boolean;
     can_update_status: boolean;
     can_create_manual_orders: boolean;
+    can_view_tables: boolean;
+    can_view_history: boolean;
   };
   created_at: string;
   last_login?: string;
@@ -31,6 +33,8 @@ interface UserFormData {
     can_print_orders: boolean;
     can_update_status: boolean;
     can_create_manual_orders: boolean;
+    can_view_tables: boolean;
+    can_view_history: boolean;
   };
 }
 
@@ -466,6 +470,32 @@ const AttendanceUsersPanel: React.FC = () => {
                       className="w-4 h-4 text-blue-600"
                     />
                     <span className="text-sm text-gray-700">Criar pedidos manuais</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_tables}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_tables: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar mesas</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_history}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_history: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar histórico</span>
                   </label>
 
                   <label className="flex items-center gap-2">
