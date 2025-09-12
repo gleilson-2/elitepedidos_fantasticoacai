@@ -260,7 +260,14 @@ const UnifiedAttendancePage: React.FC<UnifiedAttendancePageProps> = ({ operator,
                   <p className="text-gray-500 text-xs">
                     {operator?.code || 'N/A'} • {(() => {
                       const role = operator?.role;
-                      console.log('🔍 Role do operador:', { role, operator: operator?.name });
+                     console.log('🔍 DEBUG COMPLETO - Role do operador:', { 
+                       role, 
+                       operatorName: operator?.name,
+                       operatorCode: operator?.code,
+                       operatorObject: operator,
+                       roleType: typeof role,
+                       roleValue: JSON.stringify(role)
+                     });
                       if (role === 'admin') return 'Administrador';
                       if (role === 'attendant') return 'Atendente';
                       if (role) return role;
