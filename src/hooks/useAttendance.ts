@@ -14,6 +14,8 @@ interface AttendanceUser {
     can_print_orders: boolean;
     can_update_status: boolean;
     can_create_manual_orders: boolean;
+    can_view_tables: boolean;
+    can_view_history: boolean;
     can_view_cash_register: boolean;
     can_view_sales: boolean;
     can_view_reports: boolean;
@@ -88,6 +90,8 @@ export const useAttendance = () => {
         can_print_orders: true,
         can_update_status: true,
         can_create_manual_orders: true,
+        can_view_tables: true,
+        can_view_history: true,
         can_view_cash_register: true,
         can_view_sales: true,
         can_view_reports: true,
