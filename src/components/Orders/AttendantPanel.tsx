@@ -793,6 +793,18 @@ const AttendantPanel: React.FC<AttendantPanelProps> = ({
           />
         )}
       </div>
+
+      {/* Manual Order Form Modal */}
+      {showManualOrderForm && (
+        <ManualOrderForm
+          isOpen={showManualOrderForm}
+          onClose={() => setShowManualOrderForm(false)}
+          onOrderCreated={() => {
+            setShowManualOrderForm(false);
+            refetch();
+          }}
+        />
+      )}
     </PermissionGuard>
   );
 };
