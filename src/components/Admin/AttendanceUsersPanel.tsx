@@ -89,7 +89,7 @@ const AttendanceUsersPanel: React.FC = () => {
         can_view_orders: true,
         can_print_orders: true,
         can_update_status: true,
-        can_create_manual_orders: false,
+        can_create_manual_orders: false
         can_edit_orders: false,
         can_delete_orders: false,
         can_cancel_orders: false,
