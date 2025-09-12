@@ -58,7 +58,6 @@ const AttendantPanel: React.FC<AttendantPanelProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [lastOrderCount, setLastOrderCount] = useState(0);
   const [newOrder, setNewOrder] = useState<any | null>(null);
-  const [showManualOrderForm, setShowManualOrderForm] = useState(false);
   const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [soundSettings, setSoundSettings] = useState({
@@ -794,6 +793,18 @@ const AttendantPanel: React.FC<AttendantPanelProps> = ({
           />
         )}
       </div>
+
+      {/* Manual Order Form Modal */}
+      {showManualOrderForm && (
+        <ManualOrderForm
+          isOpen={showManualOrderForm}
+          onClose={() => setShowManualOrderForm(false)}
+          onOrderCreated={() => {
+            setShowManualOrderForm(false);
+            refetch();
+          }}
+        />
+      )}
     </PermissionGuard>
   );
 };
