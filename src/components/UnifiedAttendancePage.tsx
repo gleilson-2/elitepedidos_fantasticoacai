@@ -258,7 +258,7 @@ const UnifiedAttendancePage: React.FC<UnifiedAttendancePageProps> = ({ operator,
                 <div className="text-sm">
                   <p className="font-medium text-gray-700">{operator?.name || 'Usuário'}</p>
                   <p className="text-gray-500 text-xs">
-                    {operator?.code || 'N/A'} • {operator?.role || 'Função não definida'}
+                    {operator?.code || 'N/A'} • {operator?.role === 'admin' ? 'Administrador' : operator?.role === 'attendant' ? 'Atendente' : operator?.role || 'Função não definida'}
                   </p>
                 </div>
               </div>
