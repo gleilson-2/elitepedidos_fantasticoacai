@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Minus, ShoppingCart, User, Phone, MapPin, Package, Check } from 'lucide-react';
+import { useOrders } from '../../hooks/useOrders';
 import { usePDVCashRegister } from '../../hooks/usePDVCashRegister';
 import { useNeighborhoods } from '../../hooks/useNeighborhoods';
 import DeliveryTypeSelector from '../Delivery/DeliveryTypeSelector';
@@ -18,7 +18,8 @@ import {
   ShoppingBag,
   Search,
   X,
-  AlertCircle
+  AlertCircle,
+  Check
 } from 'lucide-react';
 
 interface ManualOrderFormProps {
@@ -57,6 +58,7 @@ const ManualOrderForm: React.FC<ManualOrderFormProps> = ({ onClose, onOrderCreat
   const [quantity, setQuantity] = useState(1);
   const [observations, setObservations] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedComplements, setSelectedComplements] = useState<Array<{ groupId: string; complementId: string }>>([]);
   
   // Filter products based on search term
   const filteredProducts = searchTerm
@@ -82,6 +84,25 @@ const ManualOrderForm: React.FC<ManualOrderFormProps> = ({ onClose, onOrderCreat
   const getEstimatedDeliveryTime = () => {
     const neighborhood = neighborhoods.find(n => n.name === customerNeighborhood);
     return neighborhood ? neighborhood.delivery_time : 50;
+  };
+  
+  // Handle complement selection
+  const handleComplementChange = (group: any, complementId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedComplements(prev => [...prev, { groupId: group.id, complementId }]);
+    } else {
+      setSelectedComplements(prev => prev.filter(
+        sc => !(sc.groupId === group.id && sc.complementId === complementId)
+      ));
+    }
+  };
+  
+  // Handle radio complement selection
+  const handleRadioComplementChange = (group: any, complementId: string) => {
+    setSelectedComplements(prev => [
+      ...prev.filter(sc => sc.groupId !== group.id),
+      { groupId: group.id, complementId }
+    ]);
   };
   
   // Add product to order
@@ -272,34 +293,18 @@ const ManualOrderForm: React.FC<ManualOrderFormProps> = ({ onClose, onOrderCreat
                   <Phone size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
                     type="tel"
-                              const isSelected = selectedComplements.some(
-                                sc => sc.groupId === group.id && sc.complementId === complement.id
-                              );
-                              const groupSelectionCount = selectedComplements.filter(
-                                sc => sc.groupId === group.id
-                              ).length;
-                              const canSelect = groupSelectionCount < group.maxItems || isSelected;
-                              const isRadio = group.maxItems === 1;
-                              
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                  className={`flex items-center justify-between p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                                    isSelected
-                                      ? 'border-green-500 bg-green-50'
-                                      : canSelect
-                                      ? 'border-gray-200 hover:border-green-200 hover:bg-gray-50'
-                                      : 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-50'
-                                  }`}
+                    placeholder="Telefone do cliente"
                     required
                   />
-                                    <div className={`w-5 h-5 rounded-full flex items-center justify-center border ${
-                                      isSelected 
-                                        ? 'border-green-500 bg-green-500'
-                                        : 'border-gray-300'
-                                    }`}>
-                                      {isSelected && <Check size={12} className="text-white" />}
-                                    </div>
+                </div>
+              </div>
+              
+              {deliveryType === 'delivery' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Bairro *
                   </label>
                   <div className="relative">
@@ -310,30 +315,10 @@ const ManualOrderForm: React.FC<ManualOrderFormProps> = ({ onClose, onOrderCreat
                       className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                       required={deliveryType === 'delivery'}
                     >
-                                  <input
-                                    type={isRadio ? 'radio' : 'checkbox'}
-                                    name={isRadio ? `group-${group.id}` : undefined}
-                                    checked={isSelected}
-                                    disabled={!canSelect && !isSelected}
-                                    onChange={(e) => {
-                                      if (isRadio) {
-                                        handleRadioComplementChange(group, complement.id);
-                                      } else {
-                                        handleComplementChange(group, complement.id, e.target.checked);
-                                      }
-                                    }}
-                                    className="sr-only"
-                                  />
                       <option value="">Selecione o bairro</option>
                       {neighborhoods.map(neighborhood => (
                         <option key={neighborhood.id} value={neighborhood.name}>
                           {neighborhood.name} - {formatPrice(neighborhood.delivery_fee)} ({neighborhood.delivery_time}min)
-                          <div className="mt-2 text-xs text-gray-500">
-                            {group.required && (
-                              <span className="text-red-600 font-medium">* Obrigatório - </span>
-                            )}
-                            Selecionados: {groupSelectionCount}/{group.maxItems}
-                          </div>
                         </option>
                       ))}
                     </select>
