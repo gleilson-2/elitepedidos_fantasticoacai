@@ -99,7 +99,10 @@ const AttendanceUsersPanel: React.FC = () => {
         can_view_tables: false,
         can_view_history: false,
         can_view_expected_balance: false,
-        can_view_cash_balance: true
+        can_view_cash_balance: true,
+        can_view_cash_details: false,
+        can_view_sales_totals: false,
+        can_view_cash_entries: false
       }
     });
     setEditingUser(null);
@@ -417,6 +420,58 @@ const AttendanceUsersPanel: React.FC = () => {
                   />
                   <span className="text-sm text-gray-700">Visualizar saldos de caixa</span>
                 </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_expected_balance}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_expected_balance: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar saldo esperado</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_cash_details}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_cash_details: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Ver detalhes completos do caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_sales_totals}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_sales_totals: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar totais de vendas</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_cash_entries}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_cash_entries: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar movimentações de caixa</span>
+                  </label>
 
 
               {/* Permissions */}
