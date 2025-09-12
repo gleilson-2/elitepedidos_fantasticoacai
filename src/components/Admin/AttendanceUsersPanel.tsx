@@ -95,7 +95,8 @@ const AttendanceUsersPanel: React.FC = () => {
         can_update_status: true,
         can_create_manual_orders: false
       }
-    });
+        can_view_history: false,
+        can_view_expected_balance: false
     setEditingUser(null);
   };
 
@@ -498,6 +499,18 @@ const AttendanceUsersPanel: React.FC = () => {
                     <span className="text-sm text-gray-700">Visualizar histórico</span>
                   </label>
 
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_expected_balance}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_expected_balance: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar saldo esperado</span>
+                  </label>
                   <label className="flex items-center gap-2">
                     <input
                       type="checkbox"
