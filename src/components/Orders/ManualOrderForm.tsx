@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useOrders } from '../../hooks/useOrders';
+import { X, Plus, Minus, ShoppingCart, User, Phone, MapPin, Package, Check } from 'lucide-react';
 import { usePDVCashRegister } from '../../hooks/usePDVCashRegister';
 import { useNeighborhoods } from '../../hooks/useNeighborhoods';
 import DeliveryTypeSelector from '../Delivery/DeliveryTypeSelector';
@@ -181,11 +181,6 @@ const ManualOrderForm: React.FC<ManualOrderFormProps> = ({ onClose, onOrderCreat
         scheduled_pickup_time: deliveryType === 'pickup' ? scheduledPickupTime : null,
         delivery_fee: getDeliveryFee(),
         estimated_delivery_minutes: getEstimatedDeliveryTime(),
-        // Verificar se pode adicionar mais itens
-        if (groupSelections.length >= group.maxItems) {
-          return prev;
-        }
-        
         items,
         total_price: getTotalPrice() + getDeliveryFee(),
         status: 'confirmed' as const,
@@ -195,7 +190,6 @@ const ManualOrderForm: React.FC<ManualOrderFormProps> = ({ onClose, onOrderCreat
       const newOrder = await createOrder(orderData);
       
       if (onOrderCreated) {
-        // Remover item
         onOrderCreated(newOrder.id);
       }
       
