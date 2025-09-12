@@ -54,6 +54,7 @@ const AttendantPanel: React.FC<AttendantPanelProps> = ({
   
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('pending');
   const [showPrinterSetup, setShowPrinterSetup] = useState(false);
+  const [showManualOrderForm, setShowManualOrderForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [lastOrderCount, setLastOrderCount] = useState(0);
   const [newOrder, setNewOrder] = useState<any | null>(null);
@@ -792,6 +793,22 @@ const AttendantPanel: React.FC<AttendantPanelProps> = ({
           />
         )}
       </div>
+
+      {/* Manual Order Form Modal */}
+      {showManualOrderForm && (
+        <ManualOrderForm
+          isOpen={showManualOrderForm}
+          onClose={() => {
+            console.log('🚪 Fechando modal de pedido manual...');
+            setShowManualOrderForm(false);
+          }}
+          onOrderCreated={(order) => {
+            console.log('✅ Pedido manual criado:', order.id);
+            setShowManualOrderForm(false);
+            refetch();
+          }}
+        />
+      )}
 
       {/* Manual Order Form Modal */}
       {showManualOrderForm && (
