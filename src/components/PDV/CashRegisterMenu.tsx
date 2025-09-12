@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { PDVOperator } from '../../types/pdv';
 import CashRegisterDetails from './CashRegisterDetails';
+import CashRegisterDetails from './CashRegisterDetails';
 import CashRegisterCloseConfirmation from './CashRegisterCloseConfirmation';
 import { supabase } from '../../lib/supabase';
 
@@ -1121,6 +1122,17 @@ const CashRegisterMenu: React.FC<CashRegisterMenuProps> = ({ isAdmin = false, op
         )}
       </div>
     </PermissionGuard>
+      {/* Cash Register Details Modal */}
+      {showDetails && currentRegister && (
+        <CashRegisterDetails
+          isOpen={showDetails}
+          onClose={() => setShowDetails(false)}
+          register={currentRegister}
+          summary={summary}
+          operator={operator}
+        />
+      )}
+
   );
 };
 
