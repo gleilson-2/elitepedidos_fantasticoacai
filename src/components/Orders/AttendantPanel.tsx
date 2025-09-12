@@ -22,6 +22,7 @@ import {
   Plus,
   Printer
 } from 'lucide-react';
+import ManualOrderForm from './ManualOrderForm';
 
 interface AttendantPanelProps {
   onBackToAdmin?: () => void;
@@ -57,6 +58,7 @@ const AttendantPanel: React.FC<AttendantPanelProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [lastOrderCount, setLastOrderCount] = useState(0);
   const [newOrder, setNewOrder] = useState<any | null>(null);
+  const [showManualOrderForm, setShowManualOrderForm] = useState(false);
   const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [soundSettings, setSoundSettings] = useState({
