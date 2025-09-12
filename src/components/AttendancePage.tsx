@@ -61,7 +61,10 @@ const AttendancePage: React.FC = () => {
         can_edit_cash_entries: attendanceUser.permissions?.can_edit_cash_entries || false,
         can_delete_cash_entries: attendanceUser.permissions?.can_delete_cash_entries || false,
         can_cancel_cash_entries: attendanceUser.permissions?.can_cancel_cash_entries || false,
-        can_view_cash_balance: attendanceUser.permissions?.can_view_cash_balance || false
+        can_view_cash_balance: attendanceUser.permissions?.can_view_cash_balance || false,
+        can_view_cash_details: attendanceUser.permissions?.can_view_cash_details || false,
+        can_view_sales_totals: attendanceUser.permissions?.can_view_sales_totals || false,
+        can_view_cash_entries: attendanceUser.permissions?.can_view_cash_entries || false
       },
       created_at: attendanceUser.created_at,
       updated_at: attendanceUser.updated_at,
