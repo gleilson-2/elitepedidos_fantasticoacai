@@ -810,22 +810,21 @@ const AttendanceUsersPanel: React.FC = () => {
 
               <div className="flex gap-3 pt-6 border-t border-gray-200">
                 <button
+                  type="submit"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  <Save size={20} />
+                  {editingUser ? 'Atualizar Usuário' : 'Criar Usuário'}
+                </button>
+                <button
                   type="button"
                   onClick={() => {
                     setShowModal(false);
                     resetForm();
                   }}
-                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <X size={20} />
                   Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
-                >
-                  <Save size={20} />
-                  {editingUser ? 'Atualizar' : 'Criar'} Usuário
                 </button>
               </div>
             </form>
