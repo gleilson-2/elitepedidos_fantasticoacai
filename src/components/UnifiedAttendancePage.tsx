@@ -1,498 +1,355 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Edit, Trash2, Save, X, Eye, EyeOff, Shield, UserCheck } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { 
+  Users, 
+  Package, 
+  ShoppingCart, 
+  DollarSign, 
+  Settings, 
+  LogOut, 
+  BarChart3,
+  Clock,
+  FileText,
+  Calculator,
+  Utensils,
+  AlertCircle,
+  CheckCircle,
+  RefreshCw,
+  User,
+  Shield
+} from 'lucide-react';
+import { PDVOperator } from '../types/pdv';
+import AttendantPanel from './Orders/AttendantPanel';
+import PDVSalesScreen from './PDV/PDVSalesScreen';
+import CashRegisterMenu from './PDV/CashRegisterMenu';
+import PDVReports from './PDV/PDVReports';
+import PDVSalesReport from './PDV/PDVSalesReport';
+import PDVDailyCashReport from './PDV/PDVDailyCashReport';
+import TableSalesPanel from './TableSales/TableSalesPanel';
+import SalesHistoryPanel from './Orders/SalesHistoryPanel';
+import PermissionGuard from './PermissionGuard';
+import { usePermissions } from '../hooks/usePermissions';
 
-interface AttendanceUser {
-  id: string;
-  username: string;
-  name: string;
-  role: string;
-  is_active: boolean;
-  permissions: {
-    can_chat: boolean;
-    can_view_orders: boolean;
-    can_print_orders: boolean;
-    can_update_status: boolean;
-    can_create_manual_orders: boolean;
-  };
-  created_at: string;
-  last_login?: string;
+interface UnifiedAttendancePageProps {
+  operator: PDVOperator;
+  onLogout: () => void;
 }
 
-interface UserFormData {
-  username: string;
-  name: string;
-  password: string;
-  role: string;
-  is_active: boolean;
-  permissions: {
-    can_chat: boolean;
-    can_view_orders: boolean;
-    can_print_orders: boolean;
-    can_update_status: boolean;
-    can_create_manual_orders: boolean;
-  };
-}
+type TabType = 'orders' | 'sales' | 'cash' | 'reports' | 'sales-report' | 'cash-report' | 'tables' | 'history';
 
-const AttendanceUsersPanel: React.FC = () => {
-  const [users, setUsers] = useState<AttendanceUser[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [editingUser, setEditingUser] = useState<AttendanceUser | null>(null);
-  const [formData, setFormData] = useState<UserFormData>({
-    username: '',
-    name: '',
-    password: '',
-    role: 'attendant',
-    is_active: true,
-    permissions: {
-      can_chat: true,
-      can_view_orders: true,
-      can_print_orders: true,
-      can_update_status: true,
-      can_create_manual_orders: false
-    }
-  });
+const UnifiedAttendancePage: React.FC<UnifiedAttendancePageProps> = ({ operator, onLogout }) => {
+  const [activeTab, setActiveTab] = useState<TabType>('orders');
+  const { hasPermission } = usePermissions(operator);
 
+  // Debug das permissões
   useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('attendance_users')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setUsers(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar usuários:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      username: '',
-      name: '',
-      password: '',
-      role: 'attendant',
-      is_active: true,
-      permissions: {
-        can_chat: true,
-        can_view_orders: true,
-        can_print_orders: true,
-        can_update_status: true,
-        can_create_manual_orders: false
-      }
+    console.log('🔍 UnifiedAttendancePage - Operador carregado:', {
+      name: operator?.name,
+      code: operator?.code,
+      role: operator?.role,
+      permissions: operator?.permissions ? Object.entries(operator.permissions)
+        .filter(([_, value]) => value)
+        .map(([key, _]) => key) : 'Sem permissões'
     });
-    setEditingUser(null);
-  };
+  }, [operator]);
 
-  const handleCreate = () => {
-    resetForm();
-    setShowModal(true);
-  };
+  // Verificar se o usuário tem pelo menos uma permissão básica
+  const hasAnyPermission = operator?.permissions && (
+    operator.permissions.can_view_orders ||
+    operator.permissions.can_view_sales ||
+    operator.permissions.can_view_cash_register ||
+    operator.permissions.can_view_tables ||
+    operator.permissions.can_view_history ||
+    operator.permissions.can_view_reports
+  );
 
-  const handleEdit = (user: AttendanceUser) => {
-    setFormData({
-      username: user.username,
-      name: user.name,
-      password: '',
-      role: user.role,
-      is_active: user.is_active,
-      permissions: user.permissions
-    });
-    setEditingUser(user);
-    setShowModal(true);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!formData.username.trim() || !formData.name.trim()) {
-      alert('Por favor, preencha todos os campos obrigatórios');
-      return;
-    }
-
-    try {
-      if (editingUser) {
-        // Update existing user
-        const updateData: any = {
-          username: formData.username,
-          name: formData.name,
-          role: formData.role,
-          is_active: formData.is_active,
-          permissions: formData.permissions
-        };
-
-        // Only include password if it's provided
-        if (formData.password.trim()) {
-          updateData.password_hash = formData.password;
-        }
-
-        const { error } = await supabase
-          .from('attendance_users')
-          .update(updateData)
-          .eq('id', editingUser.id);
-
-        if (error) throw error;
-      } else {
-        // Create new user
-        if (!formData.password.trim()) {
-          alert('Senha é obrigatória para novos usuários');
-          return;
-        }
-
-        const { error } = await supabase
-          .from('attendance_users')
-          .insert({
-            username: formData.username,
-            name: formData.name,
-            password_hash: formData.password,
-            role: formData.role,
-            is_active: formData.is_active,
-            permissions: formData.permissions
-          });
-
-        if (error) throw error;
-      }
-
-      setShowModal(false);
-      resetForm();
-      loadUsers();
-      alert(`Usuário ${editingUser ? 'atualizado' : 'criado'} com sucesso!`);
-    } catch (error) {
-      console.error('Erro ao salvar usuário:', error);
-      alert('Erro ao salvar usuário. Tente novamente.');
-    }
-  };
-
-  const handleDelete = async (user: AttendanceUser) => {
-    if (!confirm(`Tem certeza que deseja excluir o usuário "${user.name}"?`)) {
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('attendance_users')
-        .delete()
-        .eq('id', user.id);
-
-      if (error) throw error;
-      
-      loadUsers();
-      alert('Usuário excluído com sucesso!');
-    } catch (error) {
-      console.error('Erro ao excluir usuário:', error);
-      alert('Erro ao excluir usuário. Tente novamente.');
-    }
-  };
-
-  if (loading) {
+  // Se não tem nenhuma permissão, mostrar aviso
+  if (!hasAnyPermission) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
+          <div className="bg-red-100 rounded-full p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <Shield className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Sem Permissões</h2>
+          <p className="text-gray-600 mb-6">
+            Seu usuário não possui permissões para acessar nenhuma funcionalidade do sistema.
+            Entre em contato com o administrador para configurar suas permissões.
+          </p>
+          <div className="space-y-3">
+            <div className="text-left bg-gray-50 p-3 rounded-lg">
+              <p className="text-sm font-medium text-gray-700 mb-2">Usuário atual:</p>
+              <p className="text-sm text-gray-600">Nome: {operator?.name || 'Não informado'}</p>
+              <p className="text-sm text-gray-600">Código: {operator?.code || 'Não informado'}</p>
+              <p className="text-sm text-gray-600">Função: {operator?.role || 'Não informado'}</p>
+            </div>
+            <button
+              onClick={onLogout}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg transition-colors"
+            >
+              Fazer Logout
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-            <Users size={24} className="text-blue-600" />
-            Usuários do Atendimento
-          </h2>
-          <p className="text-gray-600">Gerencie usuários e permissões para o sistema de atendimento</p>
-        </div>
-        <button
-          onClick={handleCreate}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Novo Usuário
-        </button>
-      </div>
+  // Definir abas disponíveis baseadas nas permissões
+  const availableTabs = [
+    {
+      id: 'orders' as TabType,
+      label: 'Pedidos',
+      icon: Package,
+      permission: 'can_view_orders',
+      description: 'Gerenciar pedidos de delivery'
+    },
+    {
+      id: 'sales' as TabType,
+      label: 'Vendas PDV',
+      icon: ShoppingCart,
+      permission: 'can_view_sales',
+      description: 'Sistema de vendas PDV'
+    },
+    {
+      id: 'cash' as TabType,
+      label: 'Caixas',
+      icon: DollarSign,
+      permission: 'can_view_cash_register',
+      description: 'Controle de caixa'
+    },
+    {
+      id: 'tables' as TabType,
+      label: 'Mesas',
+      icon: Utensils,
+      permission: 'can_view_tables',
+      description: 'Sistema de mesas'
+    },
+    {
+      id: 'history' as TabType,
+      label: 'Histórico',
+      icon: FileText,
+      permission: 'can_view_history',
+      description: 'Histórico de vendas'
+    },
+    {
+      id: 'reports' as TabType,
+      label: 'Relatórios',
+      icon: BarChart3,
+      permission: 'can_view_reports',
+      description: 'Relatórios gerais'
+    },
+    {
+      id: 'sales-report' as TabType,
+      label: 'Rel. Vendas',
+      icon: Calculator,
+      permission: 'can_view_sales_report',
+      description: 'Relatório de vendas'
+    },
+    {
+      id: 'cash-report' as TabType,
+      label: 'Rel. Caixa',
+      icon: Clock,
+      permission: 'can_view_cash_report',
+      description: 'Relatório de caixa'
+    }
+  ].filter(tab => {
+    const permission = tab.permission as keyof PDVOperator['permissions'];
+    const hasTabPermission = hasPermission(permission);
+    
+    console.log(`🔍 Tab ${tab.label} - Permissão ${permission}:`, {
+      hasPermission: hasTabPermission,
+      operatorPermission: operator?.permissions?.[permission],
+      operatorCode: operator?.code
+    });
+    
+    return hasTabPermission;
+  });
 
-      {/* Users List */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">
-            Usuários Cadastrados ({users.length})
-          </h3>
-        </div>
+  // Se não há abas disponíveis, definir a primeira aba com permissão
+  useEffect(() => {
+    if (availableTabs.length > 0 && !availableTabs.find(tab => tab.id === activeTab)) {
+      console.log('🔄 Definindo aba padrão:', availableTabs[0].id);
+      setActiveTab(availableTabs[0].id);
+    }
+  }, [availableTabs, activeTab]);
 
-        {users.length === 0 ? (
+  const renderTabContent = () => {
+    console.log('🎯 Renderizando conteúdo da aba:', activeTab);
+    
+    switch (activeTab) {
+      case 'orders':
+        return (
+          <PermissionGuard hasPermission={hasPermission('can_view_orders')} showMessage={true}>
+            <AttendantPanel operator={operator} />
+          </PermissionGuard>
+        );
+      case 'sales':
+        return (
+          <PermissionGuard hasPermission={hasPermission('can_view_sales')} showMessage={true}>
+            <PDVSalesScreen operator={operator} />
+          </PermissionGuard>
+        );
+      case 'cash':
+        return (
+          <PermissionGuard hasPermission={hasPermission('can_view_cash_register')} showMessage={true}>
+            <CashRegisterMenu operator={operator} />
+          </PermissionGuard>
+        );
+      case 'tables':
+        return (
+          <PermissionGuard hasPermission={hasPermission('can_view_tables')} showMessage={true}>
+            <TableSalesPanel storeId={1} />
+          </PermissionGuard>
+        );
+      case 'history':
+        return (
+          <PermissionGuard hasPermission={hasPermission('can_view_history')} showMessage={true}>
+            <SalesHistoryPanel />
+          </PermissionGuard>
+        );
+      case 'reports':
+        return (
+          <PermissionGuard hasPermission={hasPermission('can_view_reports')} showMessage={true}>
+            <PDVReports />
+          </PermissionGuard>
+        );
+      case 'sales-report':
+        return (
+          <PermissionGuard hasPermission={hasPermission('can_view_sales_report')} showMessage={true}>
+            <PDVSalesReport />
+          </PermissionGuard>
+        );
+      case 'cash-report':
+        return (
+          <PermissionGuard hasPermission={hasPermission('can_view_cash_report')} showMessage={true}>
+            <PDVDailyCashReport />
+          </PermissionGuard>
+        );
+      default:
+        return (
           <div className="text-center py-12">
-            <Users size={48} className="mx-auto text-gray-300 mb-4" />
-            <h3 className="text-lg font-medium text-gray-600 mb-2">
-              Nenhum usuário cadastrado
-            </h3>
-            <p className="text-gray-500 mb-4">
-              Clique em "Novo Usuário" para adicionar o primeiro usuário
-            </p>
-            <button
-              onClick={handleCreate}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-            >
-              Criar Primeiro Usuário
-            </button>
+            <AlertCircle size={48} className="mx-auto text-gray-300 mb-4" />
+            <p className="text-gray-500">Selecione uma aba para começar</p>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {users.map((user) => (
-              <div key={user.id} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h4 className="font-semibold text-gray-800">{user.name}</h4>
-                      <span className="text-sm text-gray-500">@{user.username}</span>
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                        user.is_active 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {user.is_active ? 'Ativo' : 'Inativo'}
-                      </span>
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                        {user.role === 'admin' ? 'Administrador' : 'Atendente'}
-                      </span>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      {Object.entries(user.permissions).map(([key, value]) => (
-                        value && (
-                          <span key={key} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                            {key.replace('can_', '').replace('_', ' ')}
-                          </span>
-                        )
-                      ))}
-                    </div>
-                  </div>
+        );
+    }
+  };
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEdit(user)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-1"
-                    >
-                      <Edit size={14} />
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(user)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-1"
-                    >
-                      <Trash2 size={14} />
-                      Excluir
-                    </button>
-                  </div>
-                </div>
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-100 rounded-full p-2">
+                <Users size={24} className="text-blue-600" />
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* User Form Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-800">
-                  {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowModal(false);
-                    resetForm();
-                  }}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <X size={20} />
-                </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">Sistema de Atendimento</h1>
+                <p className="text-gray-600">Elite Açaí - Painel Unificado</p>
               </div>
             </div>
-
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nome Completo *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Ex: João Silva"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nome de Usuário *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.username}
-                    onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Ex: joao.silva"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Senha {editingUser ? '(deixe em branco para manter)' : '*'}
-                  </label>
-                  <input
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Digite a senha"
-                    required={!editingUser}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Função
-                  </label>
-                  <select
-                    value={formData.role}
-                    onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="attendant">Atendente</option>
-                    <option value="admin">Administrador</option>
-                  </select>
+            
+            <div className="flex items-center gap-4">
+              {/* User Info */}
+              <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg">
+                <User size={18} className="text-gray-600" />
+                <div className="text-sm">
+                  <p className="font-medium text-gray-700">{operator?.name || 'Usuário'}</p>
+                  <p className="text-gray-500 text-xs">
+                    {operator?.code || 'N/A'} • {operator?.role || 'Função não definida'}
+                  </p>
                 </div>
               </div>
-
-              <div>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.is_active}
-                    onChange={(e) => setFormData(prev => ({ ...prev, is_active: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600"
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    Usuário ativo
-                  </span>
-                </label>
-              </div>
-
-              {/* Permissions */}
-              <div>
-                <h4 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
-                  <Shield size={20} className="text-blue-600" />
-                  Permissões
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-64 overflow-y-auto">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.permissions.can_view_orders}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        permissions: { ...prev.permissions, can_view_orders: e.target.checked }
-                      }))}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">Visualizar pedidos</span>
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.permissions.can_chat}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        permissions: { ...prev.permissions, can_chat: e.target.checked }
-                      }))}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">Chat com clientes</span>
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.permissions.can_update_status}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        permissions: { ...prev.permissions, can_update_status: e.target.checked }
-                      }))}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">Atualizar status</span>
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.permissions.can_print_orders}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        permissions: { ...prev.permissions, can_print_orders: e.target.checked }
-                      }))}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">Imprimir pedidos</span>
-                  </label>
-
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.permissions.can_create_manual_orders}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        permissions: { ...prev.permissions, can_create_manual_orders: e.target.checked }
-                      }))}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">Criar pedidos manuais</span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="flex gap-4 pt-6 border-t border-gray-200">
-                <button
-                  type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                >
-                  <Save size={20} />
-                  {editingUser ? 'Atualizar Usuário' : 'Criar Usuário'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    resetForm();
-                  }}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
+              
+              {/* Logout Button */}
+              <button
+                onClick={onLogout}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+              >
+                <LogOut size={18} />
+                Sair
+              </button>
+            </div>
           </div>
         </div>
-      )}
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Debug Info (apenas em desenvolvimento) */}
+        {import.meta.env.DEV && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-6">
+            <details>
+              <summary className="text-sm font-medium text-yellow-800 cursor-pointer">
+                🔍 Debug - Informações do Usuário (clique para expandir)
+              </summary>
+              <div className="mt-2 text-xs text-yellow-700 space-y-1">
+                <p><strong>Nome:</strong> {operator?.name}</p>
+                <p><strong>Código:</strong> {operator?.code}</p>
+                <p><strong>Função:</strong> {operator?.role}</p>
+                <p><strong>Ativo:</strong> {operator?.is_active ? 'Sim' : 'Não'}</p>
+                <p><strong>Permissões ativas:</strong></p>
+                <div className="ml-4 grid grid-cols-2 gap-1">
+                  {operator?.permissions && Object.entries(operator.permissions)
+                    .filter(([_, value]) => value)
+                    .map(([key, _]) => (
+                      <span key={key} className="text-xs bg-yellow-100 px-2 py-1 rounded">
+                        {key}
+                      </span>
+                    ))
+                  }
+                </div>
+                <p><strong>Abas disponíveis:</strong> {availableTabs.map(tab => tab.label).join(', ')}</p>
+              </div>
+            </details>
+          </div>
+        )}
+
+        {/* Navigation Tabs */}
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+          <div className="flex flex-wrap gap-2">
+            {availableTabs.map((tab) => {
+              const TabIcon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-102'
+                  }`}
+                  title={tab.description}
+                >
+                  <TabIcon size={18} />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          
+          {availableTabs.length === 0 && (
+            <div className="text-center py-8">
+              <Shield size={48} className="mx-auto text-gray-300 mb-4" />
+              <h3 className="text-lg font-medium text-gray-600 mb-2">
+                Nenhuma funcionalidade disponível
+              </h3>
+              <p className="text-gray-500">
+                Seu usuário não possui permissões para acessar nenhuma funcionalidade.
+                Entre em contato com o administrador.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Tab Content */}
+        <div className="transition-all duration-300">
+          {renderTabContent()}
+        </div>
+      </div>
     </div>
   );
 };
 
-export default AttendanceUsersPanel;
+export default UnifiedAttendancePage;
