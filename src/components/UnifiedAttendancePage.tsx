@@ -891,8 +891,8 @@ function UnifiedAttendancePage({ operator, storeSettings, scaleHook, onLogout }:
           )}
           {activeTab === 'sales' && (isAdmin || hasPermission('can_view_sales')) && <PDVSalesScreen operator={operator} scaleHook={scaleHook || scale} storeSettings={settings} />}
           {activeTab === 'cash' && <CashRegisterMenu isAdmin={isAdmin} operator={operator} />}
-          {activeTab === 'tables' && (isAdmin || hasPermission('can_view_sales') || hasPermission('can_view_attendance')) && <TableSalesPanel storeId={1} operatorName={operator?.name} isCashRegisterOpen={isCashRegisterOpen} />}
-          {activeTab === 'history' && (isAdmin || hasPermission('can_view_sales') || hasPermission('can_view_sales_report')) && <SalesHistoryPanel storeId={1} operator={operator} isAdmin={isAdmin} />}
+          {activeTab === 'tables' && (isAdmin || hasPermission('can_view_sales')) && <TableSalesPanel storeId={1} operatorName={operator?.name} isCashRegisterOpen={isCashRegisterOpen} />}
+          {activeTab === 'history' && (isAdmin || hasPermission('can_view_sales')) && <SalesHistoryPanel storeId={1} operator={operator} isAdmin={isAdmin} />}
         </div>
       </div>
     </div>
