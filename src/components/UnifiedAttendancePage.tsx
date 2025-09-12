@@ -277,35 +277,6 @@ const UnifiedAttendancePage: React.FC<UnifiedAttendancePageProps> = ({ operator,
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Debug Info (apenas em desenvolvimento) */}
-        {import.meta.env.DEV && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-6">
-            <details>
-              <summary className="text-sm font-medium text-yellow-800 cursor-pointer">
-                🔍 Debug - Informações do Usuário (clique para expandir)
-              </summary>
-              <div className="mt-2 text-xs text-yellow-700 space-y-1">
-                <p><strong>Nome:</strong> {operator?.name}</p>
-                <p><strong>Código:</strong> {operator?.code}</p>
-                <p><strong>Função:</strong> {operator?.role}</p>
-                <p><strong>Ativo:</strong> {operator?.is_active ? 'Sim' : 'Não'}</p>
-                <p><strong>Permissões ativas:</strong></p>
-                <div className="ml-4 grid grid-cols-2 gap-1">
-                  {operator?.permissions && Object.entries(operator.permissions)
-                    .filter(([_, value]) => value)
-                    .map(([key, _]) => (
-                      <span key={key} className="text-xs bg-yellow-100 px-2 py-1 rounded">
-                        {key}
-                      </span>
-                    ))
-                  }
-                </div>
-                <p><strong>Abas disponíveis:</strong> {availableTabs.map(tab => tab.label).join(', ')}</p>
-              </div>
-            </details>
-          </div>
-        )}
-
         {/* Navigation Tabs */}
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
           <div className="flex flex-wrap gap-2">
