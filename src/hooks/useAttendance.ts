@@ -145,7 +145,7 @@ export const useAttendance = () => {
         can_use_scale: false,
         can_discount: false,
         can_cancel: false,
-        can_view_expected_balance: true,
+        can_view_expected_balance: false,
         can_edit_orders: false,
         can_delete_orders: false,
         can_cancel_orders: false,
