@@ -4,9 +4,9 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { useThermalPrinter } from '../../hooks/useThermalPrinter';
 import PermissionGuard from '../PermissionGuard';
 import OrderPrintView from './OrderPrintView';
-import ManualOrderForm from '../ManualOrderForm';
+import ManualOrderForm from './ManualOrderForm';
 import OrderCard from './OrderCard';
-import ManualOrderForm from '../ManualOrderForm';
+import ManualOrderForm from './ManualOrderForm';
 import ThermalPrinterSetup from '../PDV/ThermalPrinterSetup';
 import { OrderStatus } from '../../types/order';
 import { 
@@ -33,6 +33,7 @@ interface AttendantPanelProps {
   onOrderStatusChange?: (orderId: string, newStatus: OrderStatus) => Promise<void>;
 }
 
+const AttendantPanel: React.FC<AttendantPanelProps> = ({
   onBackToAdmin, 
   storeSettings,
   orders: externalOrders,
@@ -53,7 +54,6 @@ interface AttendantPanelProps {
   const handleStatusChange = onOrderStatusChange || updateOrderStatus;
   
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('pending');
-  const [showManualOrderForm, setShowManualOrderForm] = useState(false);
   const [showPrinterSetup, setShowPrinterSetup] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [lastOrderCount, setLastOrderCount] = useState(0);
@@ -793,30 +793,6 @@ interface AttendantPanelProps {
           />
         )}
       </div>
-
-      {/* Manual Order Form Modal */}
-      {showManualOrderForm && (
-        <ManualOrderForm
-          isOpen={showManualOrderForm}
-          onClose={() => setShowManualOrderForm(false)}
-          onOrderCreated={() => {
-            setShowManualOrderForm(false);
-            refetch();
-          }}
-        />
-      )}
-
-      {/* Manual Order Form Modal */}
-      {showManualOrderForm && (
-        <ManualOrderForm
-          isOpen={showManualOrderForm}
-          onClose={() => setShowManualOrderForm(false)}
-          onOrderCreated={() => {
-            setShowManualOrderForm(false);
-            refetch();
-          }}
-        />
-      )}
     </PermissionGuard>
   );
 };
