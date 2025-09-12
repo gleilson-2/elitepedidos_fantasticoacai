@@ -51,28 +51,8 @@ const AttendanceUsersPanel: React.FC = () => {
       can_print_orders: true,
       can_update_status: true,
       can_create_manual_orders: false,
-      can_view_cash_register: false,
-      can_view_sales: false,
-      can_view_reports: false,
-      can_view_cash_report: false,
-      can_view_sales_report: false,
-      can_manage_products: false,
-      can_view_operators: false,
-      can_view_attendance: false,
-      can_manage_settings: false,
-      can_use_scale: false,
-      can_discount: false,
-      can_cancel: false,
-      can_view_expected_balance: false,
-      can_edit_orders: false,
-      can_delete_orders: false,
-      can_cancel_orders: false,
-      can_manage_cash_entries: false,
-      can_edit_sales: false,
-      can_delete_sales: false,
-      can_edit_cash_entries: false,
-      can_delete_cash_entries: false,
-      can_cancel_cash_entries: false
+      can_view_tables: false,
+      can_view_history: false
     }
   });
 
@@ -772,6 +752,32 @@ const AttendanceUsersPanel: React.FC = () => {
                       className="w-4 h-4 text-blue-600"
                     />
                     <span className="text-sm text-gray-700">Cancelar movimentações de caixa</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_tables}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_tables: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar mesas</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.permissions.can_view_history}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        permissions: { ...prev.permissions, can_view_history: e.target.checked }
+                      }))}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="text-sm text-gray-700">Visualizar histórico</span>
                   </label>
                 </div>
               </div>
