@@ -896,4 +896,3 @@ const AttendanceUsersPanel: React.FC = () => {
                     />
                     <span className="text-sm text-gray-700">Cancelar vendas</span>
                   </label>
-                </div>
