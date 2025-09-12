@@ -1,139 +1,86 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOrders, useOrderChat } from '../../hooks/useOrders';
-import { usePDVCashRegister } from '../../hooks/usePDVCashRegister';
-import { useOrderSettings } from '../../hooks/useOrderSettings';
-import { useThermalPrinter } from '../../hooks/useThermalPrinter';
-import { usePermissions } from '../../hooks/usePermissions';
-import ManualOrderForm from './ManualOrderForm';
+import { Order, OrderStatus } from '../../types/order';
 import OrderCard from './OrderCard';
-import ThermalPrinterSetup from '../PDV/ThermalPrinterSetup';
-import { OrderStatus } from '../../types/order';
-import {
-  Package,
-  Plus,
-  RefreshCw,
+import OrderChat from './OrderChat';
+import ManualOrderForm from './ManualOrderForm';
+import { 
+  Package, 
+  Plus, 
+  RefreshCw, 
+  MessageCircle, 
   Filter,
   Search,
+  Clock,
+  CheckCircle,
+  AlertTriangle,
+  Truck,
+  User,
   Bell,
-  Settings,
-  Printer
+  Settings
 } from 'lucide-react';
 import { PDVOperator } from '../../types/pdv';
 
 interface AttendantPanelProps {
-  onBackToAdmin?: () => void;
-  operator?: PDVOperator;
+  operator: PDVOperator;
 }
 
-const AttendantPanel: React.FC<AttendantPanelProps> = ({ onBackToAdmin, operator }) => {
+const AttendantPanel: React.FC<AttendantPanelProps> = ({ operator }) => {
   const { orders, loading, error, updateOrderStatus, refetch } = useOrders();
-  const { currentRegister, isOpen: isCashRegisterOpen } = usePDVCashRegister();
-  const { settings } = useOrderSettings();
-  const { connection: printerConnection, printOrder } = useThermalPrinter();
-  const { hasPermission } = usePermissions(operator);
-  
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('pending');
-  const [showPrinterSetup, setShowPrinterSetup] = useState(false);
-  const [showManualOrderForm, setShowManualOrderForm] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showChat, setShowChat] = useState(false);
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [lastOrderCount, setLastOrderCount] = useState(0);
-  const [newOrder, setNewOrder] = useState<any | null>(null);
-  const [soundEnabled, setSoundEnabled] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(new Date());
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Debug logging
-  useEffect(() => {
-    console.log('🔍 AttendantPanel - Operator permissions:', {
-      operator: operator ? {
-        name: operator.name,
-        code: operator.code,
-        permissions: Object.keys(operator.permissions).filter(key => 
-          operator.permissions[key as keyof typeof operator.permissions]
-        )
-      } : 'No operator',
-      canCreateManualOrders: hasPermission('can_create_manual_orders')
-    });
-  }, [operator, hasPermission]);
-
-  // Auto refresh orders every 30 seconds
+  // Auto refresh every 30 seconds
   useEffect(() => {
     if (!autoRefresh) return;
 
-    const autoRefreshInterval = setInterval(() => {
-      console.log('🔄 Auto-atualizando pedidos...');
+    const interval = setInterval(() => {
       refetch();
       setLastRefresh(new Date());
-    }, 30000); // 30 seconds
+    }, 30000);
 
-    return () => clearInterval(autoRefreshInterval);
+    return () => clearInterval(interval);
   }, [autoRefresh, refetch]);
 
-  // Update last refresh time when orders change
+  // Update last refresh when orders change
   useEffect(() => {
     setLastRefresh(new Date());
   }, [orders]);
 
-  // Sound notification for new orders
-  useEffect(() => {
-    if (orders.length > lastOrderCount && lastOrderCount > 0 && soundEnabled) {
-      playNotificationSound();
-    }
-    setLastOrderCount(orders.length);
-  }, [orders.length, lastOrderCount, soundEnabled]);
-
-  const playNotificationSound = () => {
+  const handleStatusUpdate = async (orderId: string, newStatus: OrderStatus) => {
     try {
-      if (!audioRef.current) {
-        audioRef.current = new Audio(settings?.channel_sounds?.delivery || 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-        audioRef.current.volume = (settings?.sound_volume || 70) / 100;
-      }
-      audioRef.current.play().catch(e => console.warn('Erro ao tocar som:', e));
-    } catch (error) {
-      console.warn('Erro ao configurar som:', error);
+      await updateOrderStatus(orderId, newStatus);
+      
+      // Show success feedback
+      const successMessage = document.createElement('div');
+      successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2';
+      successMessage.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        Status atualizado com sucesso!
+      `;
+      document.body.appendChild(successMessage);
+      
+      setTimeout(() => {
+        if (document.body.contains(successMessage)) {
+          document.body.removeChild(successMessage);
+        }
+      }, 3000);
+    } catch (err) {
+      console.error('Erro ao atualizar status:', err);
+      alert('Erro ao atualizar status do pedido');
     }
   };
 
-  const toggleAutoRefresh = () => {
-    setAutoRefresh(prev => !prev);
-    if (!autoRefresh) {
-      refetch();
-      setLastRefresh(new Date());
-    }
-  };
-
-  const handleManualOrderCreate = () => {
-    console.log('🎯 Botão Criar Pedido Manual clicado');
-    setShowManualOrderForm(true);
-  };
-
-  const handleManualOrderClose = () => {
-    console.log('❌ Fechando modal de pedido manual');
-    setShowManualOrderForm(false);
-  };
-
-  const handleManualOrderSuccess = (order: any) => {
-    console.log('✅ Pedido manual criado com sucesso:', order);
-    setShowManualOrderForm(false);
-    refetch(); // Atualizar lista de pedidos
-    
-    // Show success message
-    const successMessage = document.createElement('div');
-    successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2';
-    successMessage.innerHTML = `
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-      </svg>
-      Pedido manual criado com sucesso!
-    `;
-    document.body.appendChild(successMessage);
-    
-    setTimeout(() => {
-      if (document.body.contains(successMessage)) {
-        document.body.removeChild(successMessage);
-      }
-    }, 3000);
+  const handleOpenChat = (order: Order) => {
+    setSelectedOrder(order);
+    setShowChat(true);
   };
 
   const filteredOrders = orders.filter(order => {
@@ -146,38 +93,39 @@ const AttendantPanel: React.FC<AttendantPanelProps> = ({ onBackToAdmin, operator
     return matchesStatus && matchesSearch;
   });
 
-  const getStatusCount = (status: OrderStatus | 'all') => {
-    if (status === 'all') return orders.length;
-    return orders.filter(order => order.status === status).length;
+  const getStatusStats = () => {
+    return {
+      total: orders.length,
+      pending: orders.filter(o => o.status === 'pending').length,
+      confirmed: orders.filter(o => o.status === 'confirmed').length,
+      preparing: orders.filter(o => o.status === 'preparing').length,
+      out_for_delivery: orders.filter(o => o.status === 'out_for_delivery').length,
+      ready_for_pickup: orders.filter(o => o.status === 'ready_for_pickup').length,
+      delivered: orders.filter(o => o.status === 'delivered').length,
+      cancelled: orders.filter(o => o.status === 'cancelled').length
+    };
   };
 
-  const handlePrintOrder = async (order: any) => {
-    try {
-      if (printerConnection.isConnected) {
-        console.log('🖨️ Imprimindo pedido automaticamente via impressora térmica...');
-        await printOrder(order);
-      } else {
-        console.log('🖨️ Impressora não conectada, usando método tradicional...');
-        // Fallback to traditional print method
-        const printWindow = window.open('', '_blank', 'width=800,height=600');
-        if (printWindow) {
-          // Implementation for traditional printing would go here
-          printWindow.document.write('<html><body><h1>Pedido para impressão</h1></body></html>');
-          printWindow.print();
-          printWindow.close();
-        }
-      }
-    } catch (error) {
-      console.error('❌ Erro ao imprimir pedido:', error);
-      alert('Erro ao imprimir pedido. Verifique a conexão da impressora.');
-    }
-  };
+  const stats = getStatusStats();
+
+  const statusOptions = [
+    { value: 'all', label: 'Todos', count: stats.total, color: 'bg-gray-100 text-gray-800' },
+    { value: 'pending', label: 'Pendentes', count: stats.pending, color: 'bg-yellow-100 text-yellow-800' },
+    { value: 'confirmed', label: 'Confirmados', count: stats.confirmed, color: 'bg-blue-100 text-blue-800' },
+    { value: 'preparing', label: 'Preparando', count: stats.preparing, color: 'bg-orange-100 text-orange-800' },
+    { value: 'out_for_delivery', label: 'Entregando', count: stats.out_for_delivery, color: 'bg-purple-100 text-purple-800' },
+    { value: 'ready_for_pickup', label: 'Pronto', count: stats.ready_for_pickup, color: 'bg-indigo-100 text-indigo-800' },
+    { value: 'delivered', label: 'Entregues', count: stats.delivered, color: 'bg-green-100 text-green-800' },
+    { value: 'cancelled', label: 'Cancelados', count: stats.cancelled, color: 'bg-red-100 text-red-800' }
+  ];
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2 text-gray-600">Carregando pedidos...</span>
+      <div className="flex items-center justify-center p-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando pedidos...</p>
+        </div>
       </div>
     );
   }
@@ -185,66 +133,80 @@ const AttendantPanel: React.FC<AttendantPanelProps> = ({ onBackToAdmin, operator
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-            <Package size={24} className="text-blue-600" />
-            Gerenciar Pedidos
-          </h2>
-          <p className="text-gray-600">
-            {orders.length} pedido(s) • Última atualização: {lastRefresh.toLocaleTimeString('pt-BR')}
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          {/* Auto Refresh Toggle */}
-          <button
-            onClick={toggleAutoRefresh}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
-              autoRefresh 
-                ? 'bg-green-600 hover:bg-green-700 text-white' 
-                : 'bg-gray-600 hover:bg-gray-700 text-white'
-            }`}
-            title={autoRefresh ? 'Desativar atualização automática' : 'Ativar atualização automática'}
-          >
-            <div className={`w-2 h-2 rounded-full ${autoRefresh ? 'bg-white animate-pulse' : 'bg-gray-300'}`}></div>
-            {autoRefresh ? 'Auto' : 'Manual'}
-          </button>
-
-          {/* Printer Setup */}
-          <button
-            onClick={() => setShowPrinterSetup(true)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
-              printerConnection.isConnected
-                ? 'bg-green-600 hover:bg-green-700 text-white'
-                : 'bg-gray-600 hover:bg-gray-700 text-white'
-            }`}
-            title="Configurar impressora térmica"
-          >
-            <Printer size={16} />
-            {printerConnection.isConnected ? 'Conectada' : 'Impressora'}
-          </button>
-
-          {/* Manual Order Button */}
-          {hasPermission('can_create_manual_orders') && (
-            <button
-              onClick={handleManualOrderCreate}
-              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
-            >
-              <Plus size={20} />
-              Criar Pedido Manual
-            </button>
-          )}
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-100 rounded-full p-3">
+              <Package size={24} className="text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">Gerenciar Pedidos</h2>
+              <p className="text-gray-600">Sistema de atendimento e acompanhamento de pedidos</p>
+              <div className="flex items-center gap-2 mt-1">
+                <Clock size={14} className="text-gray-500" />
+                <span className="text-sm text-gray-500">
+                  Última atualização: {lastRefresh.toLocaleTimeString('pt-BR')}
+                </span>
+                {autoRefresh && (
+                  <span className="text-sm text-green-600 font-medium">• Auto (30s)</span>
+                )}
+              </div>
+            </div>
+          </div>
           
-          <button
-            onClick={refetch}
-            disabled={loading}
-            className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
-          >
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-            Atualizar
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                autoRefresh 
+                  ? 'bg-green-600 hover:bg-green-700 text-white' 
+                  : 'bg-gray-600 hover:bg-gray-700 text-white'
+              }`}
+            >
+              <div className={`w-2 h-2 rounded-full ${autoRefresh ? 'bg-white animate-pulse' : 'bg-gray-300'}`}></div>
+              {autoRefresh ? 'Auto' : 'Manual'}
+            </button>
+            
+            <button
+              onClick={() => setShowManualForm(true)}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              <Plus size={18} />
+              Pedido Manual
+            </button>
+            
+            <button
+              onClick={refetch}
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+              Atualizar
+            </button>
+          </div>
         </div>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+        {statusOptions.map((status) => (
+          <button
+            key={status.value}
+            onClick={() => setStatusFilter(status.value as OrderStatus | 'all')}
+            className={`p-4 rounded-xl border-2 transition-all hover:shadow-md ${
+              statusFilter === status.value
+                ? 'border-blue-500 bg-blue-50 shadow-md'
+                : 'border-gray-200 hover:border-blue-200'
+            }`}
+          >
+            <div className="text-center">
+              <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mb-2 ${status.color}`}>
+                {status.label}
+              </div>
+              <p className="text-2xl font-bold text-gray-800">{status.count}</p>
+            </div>
+          </button>
+        ))}
       </div>
 
       {/* Filters */}
@@ -257,90 +219,181 @@ const AttendantPanel: React.FC<AttendantPanelProps> = ({ onBackToAdmin, operator
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Buscar por nome, telefone ou ID..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Buscar por nome, telefone ou ID do pedido..."
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
           
-          <div className="flex gap-2 overflow-x-auto">
-            {[
-              { value: 'all' as const, label: 'Todos', color: 'bg-gray-100 text-gray-700' },
-              { value: 'pending' as const, label: 'Pendentes', color: 'bg-yellow-100 text-yellow-700' },
-              { value: 'confirmed' as const, label: 'Confirmados', color: 'bg-blue-100 text-blue-700' },
-              { value: 'preparing' as const, label: 'Preparando', color: 'bg-orange-100 text-orange-700' },
-              { value: 'out_for_delivery' as const, label: 'Entregando', color: 'bg-purple-100 text-purple-700' },
-              { value: 'ready_for_pickup' as const, label: 'Pronto', color: 'bg-indigo-100 text-indigo-700' },
-              { value: 'delivered' as const, label: 'Entregues', color: 'bg-green-100 text-green-700' }
-            ].map(status => (
-              <button
-                key={status.value}
-                onClick={() => setStatusFilter(status.value)}
-                className={`px-3 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-                  statusFilter === status.value
-                    ? 'bg-blue-600 text-white'
-                    : status.color
-                }`}
-              >
-                {status.label} ({getStatusCount(status.value)})
-              </button>
-            ))}
+          <div className="md:w-48">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as OrderStatus | 'all')}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {statusOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label} ({option.count})
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
 
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <AlertTriangle size={20} className="text-red-600" />
+            <div>
+              <h3 className="font-medium text-red-800">Erro ao carregar pedidos</h3>
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Orders List */}
       <div className="space-y-4">
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-600">{error}</p>
-          </div>
-        )}
-
         {filteredOrders.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-            <Package size={48} className="mx-auto text-gray-300 mb-4" />
-            <h3 className="text-lg font-medium text-gray-600 mb-2">
-              {searchTerm ? 'Nenhum pedido encontrado' : 'Nenhum pedido'}
+            <Package size={64} className="mx-auto text-gray-300 mb-4" />
+            <h3 className="text-xl font-medium text-gray-600 mb-2">
+              {searchTerm || statusFilter !== 'all' 
+                ? 'Nenhum pedido encontrado' 
+                : 'Nenhum pedido no momento'
+              }
             </h3>
-            <p className="text-gray-500">
-              {searchTerm 
-                ? 'Tente buscar por outro termo'
-                : statusFilter === 'all' 
-                  ? 'Não há pedidos no momento'
-                  : `Não há pedidos com status "${statusFilter}"`
+            <p className="text-gray-500 mb-6">
+              {searchTerm || statusFilter !== 'all'
+                ? 'Tente ajustar os filtros de busca'
+                : 'Novos pedidos aparecerão aqui automaticamente'
               }
             </p>
+            {autoRefresh && (
+              <div className="flex items-center justify-center gap-2 text-sm text-green-600">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span>Verificando novos pedidos automaticamente</span>
+              </div>
+            )}
           </div>
         ) : (
-          filteredOrders.map(order => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              onUpdateStatus={updateOrderStatus}
-              onPrint={handlePrintOrder}
-              operator={operator}
-            />
-          ))
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {filteredOrders.map((order) => (
+              <OrderCard
+                key={order.id}
+                order={order}
+                onStatusUpdate={handleStatusUpdate}
+                onOpenChat={handleOpenChat}
+                operator={operator}
+              />
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Thermal Printer Setup Modal */}
-      {showPrinterSetup && (
-        <ThermalPrinterSetup
-          isOpen={showPrinterSetup}
-          onClose={() => setShowPrinterSetup(false)}
-        />
+      {/* Chat Modal */}
+      {showChat && selectedOrder && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-xl">
+            <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-green-50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-100 rounded-full p-2">
+                    <MessageCircle size={20} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-800">
+                      Chat - Pedido #{selectedOrder.id.slice(-8)}
+                    </h2>
+                    <p className="text-gray-600">
+                      {selectedOrder.customer_name} • {selectedOrder.customer_phone}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowChat(false);
+                    setSelectedOrder(null);
+                  }}
+                  className="p-2 hover:bg-white/50 rounded-full transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div className="h-96">
+              <OrderChat
+                orderId={selectedOrder.id}
+                isAttendant={true}
+                attendantName={operator?.name || 'Atendente'}
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Manual Order Form Modal */}
-      {showManualOrderForm && (
-        <ManualOrderForm
-          isOpen={showManualOrderForm}
-          onClose={handleManualOrderClose}
-          onOrderCreated={handleManualOrderSuccess}
-        />
+      {showManualForm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-100 rounded-full p-2">
+                    <Plus size={20} className="text-green-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-800">Criar Pedido Manual</h2>
+                    <p className="text-gray-600">Registrar pedido feito por telefone ou presencialmente</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowManualForm(false)}
+                  className="p-2 hover:bg-white/50 rounded-full transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <ManualOrderForm
+                onOrderCreated={() => {
+                  setShowManualForm(false);
+                  refetch();
+                }}
+                onCancel={() => setShowManualForm(false)}
+              />
+            </div>
+          </div>
+        </div>
       )}
+
+      {/* Information Panel */}
+      <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-xl p-6">
+        <div className="flex items-start gap-3">
+          <Bell size={20} className="text-blue-600 mt-0.5" />
+          <div>
+            <h4 className="font-medium text-blue-800 mb-2">ℹ️ Sistema de Atendimento</h4>
+            <ul className="text-sm text-blue-700 space-y-1">
+              <li>• <strong>Atualização automática:</strong> Novos pedidos aparecem automaticamente a cada 30 segundos</li>
+              <li>• <strong>Chat em tempo real:</strong> Converse com clientes diretamente pelo sistema</li>
+              <li>• <strong>Status inteligente:</strong> Atualize o status dos pedidos com um clique</li>
+              <li>• <strong>Busca avançada:</strong> Encontre pedidos por nome, telefone ou ID</li>
+              <li>• <strong>Filtros rápidos:</strong> Visualize pedidos por status específico</li>
+              <li>• <strong>Pedidos manuais:</strong> Registre pedidos feitos por telefone</li>
+              <li>• <strong>Notificações:</strong> Sons e alertas para novos pedidos e mensagens</li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
