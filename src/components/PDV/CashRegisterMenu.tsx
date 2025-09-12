@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import { PDVOperator } from '../../types/pdv';
 import CashRegisterDetails from './CashRegisterDetails';
-import CashRegisterDetails from './CashRegisterDetails';
 import CashRegisterCloseConfirmation from './CashRegisterCloseConfirmation';
 import { supabase } from '../../lib/supabase';
 
