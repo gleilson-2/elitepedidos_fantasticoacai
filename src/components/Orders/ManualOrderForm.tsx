@@ -88,21 +88,28 @@ const ManualOrderForm: React.FC<ManualOrderFormProps> = ({ onClose, onOrderCreat
   
   // Handle complement selection
   const handleComplementChange = (group: any, complementId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedComplements(prev => [...prev, { groupId: group.id, complementId }]);
-    } else {
-      setSelectedComplements(prev => prev.filter(
-        sc => !(sc.groupId === group.id && sc.complementId === complementId)
-      ));
-    }
+    setSelectedComplements(prev => {
+      if (checked) {
+        // Verificar se pode adicionar mais itens
+        const groupSelections = prev.filter(sc => sc.groupId === group.id);
+        if (groupSelections.length >= group.maxItems) {
+          return prev;
+        }
+        return [...prev, { groupId: group.id, complementId }];
+      } else {
+        // Remover item
+        return prev.filter(sc => !(sc.groupId === group.id && sc.complementId === complementId));
+      }
+    });
   };
   
   // Handle radio complement selection
   const handleRadioComplementChange = (group: any, complementId: string) => {
-    setSelectedComplements(prev => [
-      ...prev.filter(sc => sc.groupId !== group.id),
-      { groupId: group.id, complementId }
-    ]);
+    setSelectedComplements(prev => {
+      // Remove all selections from this group and add the new one
+      const filtered = prev.filter(sc => sc.groupId !== group.id);
+      return [...filtered, { groupId: group.id, complementId }];
+    });
   };
   
   // Add product to order
@@ -506,6 +513,76 @@ const ManualOrderForm: React.FC<ManualOrderFormProps> = ({ onClose, onOrderCreat
                         <X size={16} />
                       </button>
                     </div>
+                    
+                    {selectedProduct.complementGroups && selectedProduct.complementGroups.map((group: any) => (
+                      <div key={group.id} className="mb-4">
+                        <h4 className="font-medium text-gray-800 mb-2">
+                          {group.name}
+                          {group.required && <span className="text-red-500 ml-1">*</span>}
+                        </h4>
+                        <div className="space-y-2">
+                          {group.complements.map((complement: any) => {
+                            const isSelected = selectedComplements.some(
+                              sc => sc.groupId === group.id && sc.complementId === complement.id
+                            );
+                            const groupSelectionCount = selectedComplements.filter(
+                              sc => sc.groupId === group.id
+                            ).length;
+                            const canSelect = groupSelectionCount < group.maxItems || isSelected;
+                            const isRadio = group.maxItems === 1;
+                            
+                            return (
+                              <label
+                                key={complement.id}
+                                className={`flex items-center justify-between p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                                  isSelected
+                                    ? 'border-green-500 bg-green-50'
+                                    : canSelect
+                                    ? 'border-gray-200 hover:border-green-200 hover:bg-gray-50'
+                                    : 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-50'
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-5 h-5 rounded-full flex items-center justify-center border ${
+                                    isSelected 
+                                      ? 'border-green-500 bg-green-500'
+                                      : 'border-gray-300'
+                                  }`}>
+                                    {isSelected && <Check size={12} className="text-white" />}
+                                  </div>
+                                  <div>
+                                    <div className="font-medium">{complement.name}</div>
+                                    <div className="text-sm text-green-600">
+                                      {complement.price > 0 ? `+${formatPrice(complement.price)}` : 'Grátis'}
+                                    </div>
+                                  </div>
+                                </div>
+                                <input
+                                  type={isRadio ? 'radio' : 'checkbox'}
+                                  name={isRadio ? `group-${group.id}` : undefined}
+                                  checked={isSelected}
+                                  disabled={!canSelect && !isSelected}
+                                  onChange={(e) => {
+                                    if (isRadio) {
+                                      handleRadioComplementChange(group, complement.id);
+                                    } else {
+                                      handleComplementChange(group, complement.id, e.target.checked);
+                                    }
+                                  }}
+                                  className="sr-only"
+                                />
+                              </label>
+                            );
+                          })}
+                          <div className="mt-2 text-xs text-gray-500">
+                            {group.required && (
+                              <span className="text-red-600 font-medium">* Obrigatório - </span>
+                            )}
+                            Selecionados: {groupSelectionCount}/{group.maxItems}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                     
                     <div className="flex items-center gap-3 mb-3">
                       <label className="text-sm font-medium text-gray-700">Quantidade:</label>
