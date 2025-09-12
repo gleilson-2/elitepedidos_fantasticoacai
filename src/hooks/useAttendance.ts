@@ -123,7 +123,7 @@ export const useAttendance = () => {
       username: 'sarahsantos',
       password_hash: 'elite2024',
       name: 'Sarah Santos',
-      role: 'attendant',
+      role: 'admin',
       is_active: true,
       permissions: {
         can_chat: true,
