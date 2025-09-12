@@ -16,6 +16,7 @@ interface AttendanceUser {
     can_create_manual_orders: boolean;
     can_view_tables: boolean;
     can_view_history: boolean;
+    can_view_cash_balance: boolean;
   };
   created_at: string;
   last_login?: string;
@@ -35,6 +36,7 @@ interface UserFormData {
     can_create_manual_orders: boolean;
     can_view_tables: boolean;
     can_view_history: boolean;
+    can_view_cash_balance: boolean;
   };
 }
 
@@ -97,6 +99,7 @@ const AttendanceUsersPanel: React.FC = () => {
         can_view_tables: false,
         can_view_history: false,
         can_view_expected_balance: false
+        can_view_cash_balance: true
       }
     });
     setEditingUser(null);
@@ -402,6 +405,19 @@ const AttendanceUsersPanel: React.FC = () => {
                   </span>
                 </label>
               </div>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.permissions.can_view_cash_balance}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      permissions: { ...prev.permissions, can_view_cash_balance: e.target.checked }
+                    }))}
+                    className="w-4 h-4 text-blue-600"
+                  />
+                  <span className="text-sm text-gray-700">Visualizar saldos de caixa</span>
+                </label>
+
 
               {/* Permissions */}
               <div>

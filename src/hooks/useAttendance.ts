@@ -154,7 +154,8 @@ export const useAttendance = () => {
         can_delete_sales: false,
         can_edit_cash_entries: false,
         can_delete_cash_entries: false,
-        can_cancel_cash_entries: false
+        can_cancel_cash_entries: false,
+        can_view_cash_balance: true
       },
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -195,7 +196,8 @@ export const useAttendance = () => {
         can_delete_sales: false,
         can_edit_cash_entries: false,
         can_delete_cash_entries: false,
-        can_cancel_cash_entries: false
+        can_cancel_cash_entries: false,
+        can_view_cash_balance: false
       },
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()

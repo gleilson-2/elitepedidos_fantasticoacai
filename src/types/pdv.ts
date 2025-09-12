@@ -99,6 +99,7 @@ export interface PDVOperator {
     can_edit_cash_entries: boolean;
     can_delete_cash_entries: boolean;
     can_cancel_cash_entries: boolean;
+    can_view_cash_balance: boolean;
   };
   created_at: string;
   updated_at: string;
