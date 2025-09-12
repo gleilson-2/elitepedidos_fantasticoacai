@@ -4,6 +4,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { useThermalPrinter } from '../../hooks/useThermalPrinter';
 import PermissionGuard from '../PermissionGuard';
 import OrderPrintView from './OrderPrintView';
+import ManualOrderForm from './ManualOrderForm';
 import OrderCard from './OrderCard';
 import ManualOrderForm from './ManualOrderForm';
 import ThermalPrinterSetup from '../PDV/ThermalPrinterSetup';
@@ -32,7 +33,6 @@ interface AttendantPanelProps {
   onOrderStatusChange?: (orderId: string, newStatus: OrderStatus) => Promise<void>;
 }
 
-const AttendantPanel: React.FC<AttendantPanelProps> = ({ 
   onBackToAdmin, 
   storeSettings,
   orders: externalOrders,
@@ -45,6 +45,7 @@ const AttendantPanel: React.FC<AttendantPanelProps> = ({
   const thermalPrinter = useThermalPrinter();
   
   // Usar pedidos externos se fornecidos, senão usar do hook
+  const [showManualOrderForm, setShowManualOrderForm] = useState(false);
   const orders = externalOrders || hookOrders;
   const loading = externalOrdersLoading !== undefined ? externalOrdersLoading : hookLoading;
   
@@ -792,6 +793,18 @@ const AttendantPanel: React.FC<AttendantPanelProps> = ({
           />
         )}
       </div>
+
+      {/* Manual Order Form Modal */}
+      {showManualOrderForm && (
+        <ManualOrderForm
+          isOpen={showManualOrderForm}
+          onClose={() => setShowManualOrderForm(false)}
+          onOrderCreated={() => {
+            setShowManualOrderForm(false);
+            refetch();
+          }}
+        />
+      )}
 
       {/* Manual Order Form Modal */}
       {showManualOrderForm && (
