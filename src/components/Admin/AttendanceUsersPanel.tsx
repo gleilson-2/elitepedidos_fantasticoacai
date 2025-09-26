@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Edit, Trash2, Save, X, Eye, EyeOff, Shield, UserCheck } from 'lucide-react';
+import { Users, Plus, CreditCard as Edit, Trash2, Save, X, Eye, EyeOff, Shield, UserCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface AttendanceUser {
@@ -181,15 +181,6 @@ const AttendanceUsersPanel: React.FC = () => {
       resetForm();
       loadUsers();
       alert(`Usuário ${editingUser ? 'atualizado' : 'criado'} com sucesso!`);
-      
-      // Disparar evento para sincronizar usuários no sistema de atendimento
-      try {
-        const event = new CustomEvent('refreshAttendanceUsers');
-        window.dispatchEvent(event);
-        console.log('🔄 Sincronização de usuários disparada após criar/editar');
-      } catch (err) {
-        console.warn('⚠️ Erro ao disparar sincronização:', err);
-      }
     } catch (error) {
       console.error('Erro ao salvar usuário:', error);
       alert('Erro ao salvar usuário. Tente novamente.');
@@ -211,15 +202,6 @@ const AttendanceUsersPanel: React.FC = () => {
       
       loadUsers();
       alert('Usuário excluído com sucesso!');
-      
-      // Disparar evento para sincronizar usuários no sistema de atendimento
-      try {
-        const event = new CustomEvent('refreshAttendanceUsers');
-        window.dispatchEvent(event);
-        console.log('🔄 Sincronização de usuários disparada após excluir');
-      } catch (err) {
-        console.warn('⚠️ Erro ao disparar sincronização:', err);
-      }
     } catch (error) {
       console.error('Erro ao excluir usuário:', error);
       alert('Erro ao excluir usuário. Tente novamente.');
