@@ -68,8 +68,20 @@ export const useOrders = () => {
 
   const createOrder = useCallback(async (orderData: Omit<Order, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      console.log('🚀 Criando pedido:', orderData);
+      
       if (!orderData.items || orderData.items.length === 0) {
         throw new Error('Pedido deve conter pelo menos um item');
+      }
+      
+      // Verificar se Supabase está configurado
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      if (!supabaseUrl || !supabaseKey || 
+          supabaseUrl.includes('placeholder') || 
+          supabaseKey.includes('placeholder')) {
+        throw new Error('Supabase não configurado. Configure as variáveis de ambiente para usar esta funcionalidade.');
       }
       
       const orderWithChannel = orderData.channel === 'manual' ? orderData : {
@@ -77,6 +89,8 @@ export const useOrders = () => {
         channel: orderData.channel || 'delivery',
         cash_register_id: currentRegister ? currentRegister.id : null
       };
+      
+      console.log('📝 Dados do pedido preparados:', orderWithChannel);
       
       const { data, error } = await supabase
         .from('orders')
@@ -90,13 +104,15 @@ export const useOrders = () => {
 
       if (error) throw error;
       
+      console.log('✅ Pedido criado no banco:', data);
+      
       // Criar notificação para novo pedido
       const notificationTitle = orderData.channel === 'manual' ? 'Pedido Manual Criado' : 'Novo Pedido';
       const notificationMessage = orderData.channel === 'manual' 
         ? `Pedido manual criado para ${orderData.customer_name}`
         : `Novo pedido de ${orderData.customer_name}`;
         
-      await supabase
+      const { error: notificationError } = await supabase
         .from('notifications')
         .insert([{
           order_id: data.id,
@@ -106,9 +122,14 @@ export const useOrders = () => {
           read: false,
           created_at: new Date().toISOString()
         }]);
+      
+      if (notificationError) {
+        console.warn('⚠️ Erro ao criar notificação (não crítico):', notificationError);
+      }
 
       return data;
     } catch (err) {
+      console.error('❌ Erro ao criar pedido:', err);
       throw new Error(err instanceof Error ? err.message : 'Erro ao criar pedido');
     }
   }, [currentRegister]);

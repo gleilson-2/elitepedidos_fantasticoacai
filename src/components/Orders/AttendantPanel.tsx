@@ -21,6 +21,7 @@ import { PDVOperator } from '../../types/pdv';
 import OrderCard from './OrderCard';
 import OrderChat from './OrderChat';
 import ManualOrderForm from './ManualOrderForm';
+import ManualOrderForm from './ManualOrderForm';
 import OrderPrintView from './OrderPrintView';
 
 interface AttendantPanelProps {
@@ -33,6 +34,7 @@ const AttendantPanel: React.FC<AttendantPanelProps> = ({ operator }) => {
   const [showChat, setShowChat] = useState(false);
   const [showManualOrder, setShowManualOrder] = useState(false);
   const [showPrintView, setShowPrintView] = useState(false);
+  const [showManualOrderForm, setShowManualOrderForm] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | 'all'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
@@ -147,7 +149,10 @@ const AttendantPanel: React.FC<AttendantPanelProps> = ({ operator }) => {
           </button>
           
           <button
-            onClick={() => setShowManualOrder(true)}
+            onClick={() => {
+              console.log('🔘 Botão de pedido manual clicado');
+              setShowManualOrderForm(true);
+            }}
             className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
           >
             <Plus size={18} />
@@ -250,6 +255,16 @@ const AttendantPanel: React.FC<AttendantPanelProps> = ({ operator }) => {
           ))
         )}
       </div>
+
+      <ManualOrderForm
+        isOpen={showManualOrderForm}
+        onClose={() => setShowManualOrderForm(false)}
+        onOrderCreated={(order) => {
+          console.log('✅ Pedido manual criado:', order);
+          refetch(); // Refresh orders list
+          setShowManualOrderForm(false);
+        }}
+      />
 
       {/* Chat Modal */}
       {showChat && selectedOrder && (
