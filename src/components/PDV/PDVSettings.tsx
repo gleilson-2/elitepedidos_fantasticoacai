@@ -67,9 +67,9 @@ const PDVSettings: React.FC = () => {
       console.log('🔄 Carregando configurações do banco...');
 
       const { data, error } = await supabase
-        .from('pdv_settings')
+        .from('store_settings')
         .select('*')
-        .eq('id', 'loja1')
+        .eq('id', 'default')
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
@@ -96,7 +96,7 @@ const PDVSettings: React.FC = () => {
   // Load from localStorage as fallback
   const loadFromLocalStorage = () => {
     try {
-      const savedSettings = localStorage.getItem('pdv_settings_loja1');
+      const savedSettings = localStorage.getItem('pdv_settings_default');
       if (savedSettings) {
         const parsed = JSON.parse(savedSettings);
         setSettings(prev => ({ ...prev, ...parsed }));
@@ -112,18 +112,16 @@ const PDVSettings: React.FC = () => {
   const createDefaultSettings = async () => {
     try {
       const { data, error } = await supabase
-        .from('pdv_settings')
+        .from('store_settings')
         .insert([{
-          id: 'loja1',
-          store_name: 'Elite Açaí - Loja 1',
-          printer_enabled: true,
-          scale_enabled: true,
-          auto_print: false,
-          sound_enabled: true,
-          paper_width: '80mm',
-          font_size: 14,
-          scale_port: 'COM1',
-          scale_baud_rate: 4800
+          id: 'default',
+          store_name: 'Elite Açaí',
+          phone: '(85) 98904-1010',
+          address: 'Rua das Frutas, 123 - Centro, Fortaleza/CE',
+          delivery_fee: 5.00,
+          min_order_value: 15.00,
+          estimated_delivery_time: 35,
+          is_open_now: true
         }])
         .select()
         .single();
@@ -151,7 +149,7 @@ const PDVSettings: React.FC = () => {
         console.log('💾 Salvando configurações no banco...');
 
         const { data, error } = await supabase
-          .from('pdv_settings')
+          .from('store_settings')
           .upsert({
             ...settings,
             updated_at: new Date().toISOString()
@@ -166,8 +164,8 @@ const PDVSettings: React.FC = () => {
         console.log('✅ Configurações salvas no banco:', data);
         setSettings(data);
 
-        // Also save to localStorage as backup
-        localStorage.setItem('pdv_settings_loja1', JSON.stringify(data));
+        localStorage.setItem('pdv_settings_default', JSON.stringify(settings));
+        localStorage.setItem('pdv_settings_default', JSON.stringify(data));
       }
 
       setLastSaved(new Date());
@@ -204,7 +202,7 @@ const PDVSettings: React.FC = () => {
       console.log('🔍 Testando conexão com banco...');
 
       const { data, error } = await supabase
-        .from('pdv_settings')
+        .from('store_settings')
         .select('count', { count: 'exact', head: true });
 
       if (error) throw error;

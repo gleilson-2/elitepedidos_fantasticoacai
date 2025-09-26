@@ -53,6 +53,9 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       setSelectedImage(uploadedImage.url);
     } catch (err) {
       console.error('Erro no upload:', err);
+     // Mostrar erro para o usuário
+     const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido no upload';
+     alert(`Erro no upload: ${errorMessage}`);
     }
   };
 
