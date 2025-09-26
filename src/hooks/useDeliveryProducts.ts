@@ -84,6 +84,37 @@ export const useDeliveryProducts = () => {
 
       if (error) {
         console.error('❌ Erro do Supabase:', error);
+        
+        // Se a tabela não existe, usar produtos de demonstração
+        if (error.code === 'PGRST205' || error.message?.includes('Could not find the table')) {
+          console.warn('⚠️ Tabela delivery_products não encontrada - usando produtos de demonstração');
+          
+          const { products: demoProducts } = await import('../data/products');
+          const mappedProducts = demoProducts.map(product => ({
+            id: product.id,
+            name: product.name,
+            category: product.category as DeliveryProduct['category'],
+            price: product.price,
+            original_price: product.originalPrice,
+            description: product.description,
+            image_url: product.image,
+            is_active: product.isActive !== false,
+            is_weighable: product.is_weighable || false,
+            price_per_gram: product.pricePerGram,
+            complement_groups: product.complementGroups || [],
+            sizes: product.sizes || [],
+            scheduled_days: product.scheduledDays || {},
+            availability_type: product.availability?.type || 'always',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }));
+          
+          setProducts(mappedProducts);
+          setError('Tabela não encontrada - usando modo demonstração');
+          setLoading(false);
+          return;
+        }
+        
         throw new Error(`Erro do banco de dados: ${error.message}`);
       }
       
