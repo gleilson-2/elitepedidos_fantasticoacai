@@ -22,21 +22,7 @@ export const useImageUpload = () => {
         throw new Error('Formato não suportado. Use JPG, PNG, GIF ou WebP');
       }
 
-      // Simular progresso
       setUploadProgress(25);
-
-      // Converter arquivo para base64
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const result = reader.result as string;
-          resolve(result);
-        };
-        reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
-        reader.readAsDataURL(file);
-      });
-
-      setUploadProgress(50);
 
       // Gerar nome único para o arquivo
       const timestamp = Date.now();
@@ -44,9 +30,31 @@ export const useImageUpload = () => {
       const fileName = `${timestamp}-${randomString}.${file.name.split('.').pop()}`;
       const filePath = `products/${fileName}`;
 
+      setUploadProgress(50);
+
+      // Upload para o Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Erro no upload:', uploadError);
+        throw new Error(`Erro no upload: ${uploadError.message}`);
+      }
+
       setUploadProgress(75);
 
-      // Salvar no banco de dados
+      // Obter URL pública
+      const { data: urlData } = supabase.storage
+        .from('images')
+        .getPublicUrl(filePath);
+
+      const publicUrl = urlData.publicUrl;
+
+      // Salvar metadados no banco de dados
       const { data, error: dbError } = await supabase
         .from('product_images')
         .insert({
@@ -54,13 +62,15 @@ export const useImageUpload = () => {
           file_path: filePath,
           file_size: file.size,
           mime_type: file.type,
-          public_url: base64, // Usar base64 como URL pública
+          public_url: publicUrl,
           original_name: file.name
         })
         .select()
         .single();
 
       if (dbError) {
+        // Se falhar ao salvar no banco, remover arquivo do storage
+        await supabase.storage.from('images').remove([filePath]);
         console.error('Erro ao salvar no banco:', dbError);
         throw new Error(`Erro ao salvar imagem: ${dbError.message}`);
       }
@@ -101,6 +111,16 @@ export const useImageUpload = () => {
       }
 
       const image = images[0];
+
+      // Remover arquivo do Supabase Storage
+      const { error: storageError } = await supabase.storage
+        .from('images')
+        .remove([image.file_path]);
+
+      if (storageError) {
+        console.error('Erro ao deletar do storage:', storageError);
+        // Continuar mesmo se falhar no storage, para limpar o banco
+      }
 
       // Deletar do banco de dados
       const { error: deleteError } = await supabase
