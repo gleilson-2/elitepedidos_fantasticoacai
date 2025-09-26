@@ -658,13 +658,24 @@ export const useAttendance = () => {
   useEffect(() => {
     fetchUsers();
     
+    // Escutar eventos de sincronização do painel administrativo
+    const handleRefreshEvent = () => {
+      console.log('🔔 Evento de sincronização recebido, recarregando usuários...');
+      fetchUsers();
+    };
+    
+    window.addEventListener('refreshAttendanceUsers', handleRefreshEvent);
+    
     // Recarregar usuários a cada 10 segundos para manter sincronização
     const interval = setInterval(() => {
       console.log('🔄 Sincronizando usuários do banco...');
       fetchUsers();
     }, 10000);
     
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('refreshAttendanceUsers', handleRefreshEvent);
+    };
   }, []);
 
   return {

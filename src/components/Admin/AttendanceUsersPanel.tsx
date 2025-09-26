@@ -181,6 +181,15 @@ const AttendanceUsersPanel: React.FC = () => {
       resetForm();
       loadUsers();
       alert(`Usuário ${editingUser ? 'atualizado' : 'criado'} com sucesso!`);
+      
+      // Disparar evento para sincronizar usuários no sistema de atendimento
+      try {
+        const event = new CustomEvent('refreshAttendanceUsers');
+        window.dispatchEvent(event);
+        console.log('🔄 Sincronização de usuários disparada após criar/editar');
+      } catch (err) {
+        console.warn('⚠️ Erro ao disparar sincronização:', err);
+      }
     } catch (error) {
       console.error('Erro ao salvar usuário:', error);
       alert('Erro ao salvar usuário. Tente novamente.');
@@ -202,6 +211,15 @@ const AttendanceUsersPanel: React.FC = () => {
       
       loadUsers();
       alert('Usuário excluído com sucesso!');
+      
+      // Disparar evento para sincronizar usuários no sistema de atendimento
+      try {
+        const event = new CustomEvent('refreshAttendanceUsers');
+        window.dispatchEvent(event);
+        console.log('🔄 Sincronização de usuários disparada após excluir');
+      } catch (err) {
+        console.warn('⚠️ Erro ao disparar sincronização:', err);
+      }
     } catch (error) {
       console.error('Erro ao excluir usuário:', error);
       alert('Erro ao excluir usuário. Tente novamente.');
