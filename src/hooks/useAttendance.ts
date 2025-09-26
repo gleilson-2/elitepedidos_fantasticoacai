@@ -481,7 +481,7 @@ export const useAttendance = () => {
     console.log('🔐 useAttendance - Tentativa de login:', { username, password: password ? '***' : 'vazio' });
     console.log('👥 Usuários disponíveis:', users.map(u => ({ username: u.username, name: u.name, role: u.role, is_active: u.is_active })));
     
-    // SEMPRE buscar usuário atualizado do banco de dados PRIMEIRO
+    // Função para buscar usuário no banco de dados
     const findUserInDatabase = async (): Promise<AttendanceUser | null> => {
       try {
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -532,8 +532,11 @@ export const useAttendance = () => {
       return null;
     };
     
-    // Buscar usuário do banco PRIMEIRO
-    findUserInDatabase().then(dbUser => {
+    // Buscar usuário do banco de forma síncrona
+    const performLogin = async () => {
+      // Primeiro, tentar buscar do banco
+      const dbUser = await findUserInDatabase();
+      
       if (dbUser) {
         console.log('✅ Login bem-sucedido com dados do banco - Usuário:', dbUser.name, 'Role:', dbUser.role);
         console.log('🔍 Permissões atualizadas do banco:', dbUser.permissions);
@@ -550,9 +553,17 @@ export const useAttendance = () => {
         // Atualizar último login
         updateLastLogin(dbUser.id);
         
-        return;
+        return true;
       }
       
+      return false;
+    };
+    
+    // Executar login de forma assíncrona
+    performLogin().then(success => {
+      if (!success) {
+        console.log('❌ Login falhou - credenciais inválidas');
+      }
       // Fallback para usuários locais apenas se banco falhar
       const localUser = users.find(u => 
         u.username === username && 
@@ -582,7 +593,7 @@ export const useAttendance = () => {
       }
     });
 
-    // Verificar usuários locais para resposta imediata
+    // Verificar usuários locais para resposta imediata (compatibilidade)
     const user = users.find(u => 
       u.username === username && 
       u.password_hash === password && 
@@ -590,11 +601,12 @@ export const useAttendance = () => {
     );
 
     if (user) {
-      // Login imediato com dados locais, mas será substituído pelos dados do banco
+      // Login imediato com dados locais (será atualizado pelos dados do banco)
       return true;
     }
     
-    console.log('❌ Login falhou - credenciais inválidas');
+    // Se não encontrou localmente, aguardar resultado do banco
+    // Por enquanto retornar false, mas o login assíncrono pode ainda funcionar
     return false;
   };
 
@@ -646,11 +658,11 @@ export const useAttendance = () => {
   useEffect(() => {
     fetchUsers();
     
-    // Recarregar usuários a cada 30 segundos para manter permissões sincronizadas
+    // Recarregar usuários a cada 10 segundos para manter sincronização
     const interval = setInterval(() => {
-      console.log('🔄 Recarregando usuários para sincronizar permissões...');
+      console.log('🔄 Sincronizando usuários do banco...');
       fetchUsers();
-    }, 30000);
+    }, 10000);
     
     return () => clearInterval(interval);
   }, []);
