@@ -21,7 +21,6 @@ import { PDVOperator } from '../../types/pdv';
 import OrderCard from './OrderCard';
 import OrderChat from './OrderChat';
 import ManualOrderForm from './ManualOrderForm';
-import ManualOrderForm from './ManualOrderForm';
 import OrderPrintView from './OrderPrintView';
 
 interface AttendantPanelProps {
