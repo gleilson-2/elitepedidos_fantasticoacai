@@ -143,7 +143,7 @@ export const usePDVProducts = () => {
             display_order: 3,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
-          },
+          }
         ];
         
         setProducts(demoProducts);
@@ -285,8 +285,7 @@ export const usePDVProducts = () => {
         setError(err instanceof Error ? err.message : 'Erro ao carregar produtos');
         setProducts([]); // Clear products on error
       }
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
   }, []);
@@ -391,9 +390,14 @@ export const usePDVProducts = () => {
         ...validUpdates
       } = updates as any;
       
-        setProducts(prev => prev.map(p => p.id === id ? existingProduct : p));
       const hasChanges = Object.keys(validUpdates).some(key => {
         return existingProduct[key] !== validUpdates[key];
+      });
+
+      if (!hasChanges) {
+        setProducts(prev => prev.map(p => p.id === id ? existingProduct : p));
+        return existingProduct;
+      }
 
       const { data, error } = await supabase
         .from('pdv_products')
@@ -779,6 +783,7 @@ export const usePDVCart = () => {
   const updateSplitInfo = useCallback((info: Partial<typeof splitInfo>) => {
     setSplitInfo(prev => ({ ...prev, ...info }));
   }, []);
+
   return {
     items,
     discount,
