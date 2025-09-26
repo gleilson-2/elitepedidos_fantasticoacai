@@ -224,7 +224,6 @@ export const usePDVProducts = () => {
       const { data, error } = await supabase
         .from('pdv_products')
         .select('*')
-        .order('display_order', { ascending: true, nullsLast: true })
         .order('name');
 
       if (error) {
