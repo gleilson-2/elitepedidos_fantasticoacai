@@ -123,13 +123,19 @@ const PDVProductsManager: React.FC = () => {
       }
     }
 
+    // Garantir que os campos de preço estejam corretos baseado no tipo de produto
+    const productToSave = {
+      ...editingProduct,
+      unit_price: editingProduct.is_weighable ? null : editingProduct.unit_price,
+      price_per_gram: editingProduct.is_weighable ? editingProduct.price_per_gram : null
+    };
     setSaving(true);
     try {
       if (isCreating) {
-        const { id, created_at, updated_at, ...productData } = editingProduct;
+        const { id, created_at, updated_at, ...productData } = productToSave;
         const newProduct = await createProduct(productData);
       } else {
-        await updateProduct(editingProduct.id, editingProduct);
+        await updateProduct(editingProduct.id, productToSave);
       }
       
       setEditingProduct(null);
