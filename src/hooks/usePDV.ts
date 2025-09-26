@@ -391,16 +391,9 @@ export const usePDVProducts = () => {
         ...validUpdates
       } = updates as any;
       
-      // Check if there are any actual changes to make
+        setProducts(prev => prev.map(p => p.id === id ? existingProduct : p));
       const hasChanges = Object.keys(validUpdates).some(key => {
         return existingProduct[key] !== validUpdates[key];
-      });
-
-      // If no changes are needed, return the existing product
-      if (!hasChanges) {
-        setProducts(prev => prev.map(p => p.id === id ? existingProduct : p));
-        return existingProduct;
-      }
 
       const { data, error } = await supabase
         .from('pdv_products')
