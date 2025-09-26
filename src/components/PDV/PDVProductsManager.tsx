@@ -578,9 +578,13 @@ const PDVProductsManager: React.FC = () => {
                     ...editingProduct,
                     description: e.target.value
                   })}
+                  maxLength={1000}
                   className="w-full p-3 border border-gray-300 rounded-lg resize-none h-20 focus:outline-none focus:ring-2 focus:ring-green-500"
                   placeholder="Descrição do produto..."
                 />
+                <div className="text-xs text-gray-500 mt-1">
+                  {(editingProduct.description || '').length}/1000 caracteres
+                </div>
               </div>
 
               {/* Barcode */}
