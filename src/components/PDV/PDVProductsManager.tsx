@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Package, Plus, Edit3, Trash2, Search, Eye, EyeOff, Scale, Image as ImageIcon, Save, X, Upload, AlertCircle } from 'lucide-react';
+import { Package, Plus, CreditCard as Edit3, Trash2, Search, Eye, EyeOff, Scale, Image as ImageIcon, Save, X, Upload, AlertCircle } from 'lucide-react';
 import { usePDVProducts } from '../../hooks/usePDV';
 import { useImageUpload } from '../../hooks/useImageUpload';
 import ImageUploadModal from '../Admin/ImageUploadModal';
