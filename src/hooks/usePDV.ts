@@ -285,7 +285,8 @@ export const usePDVProducts = () => {
         setError(err instanceof Error ? err.message : 'Erro ao carregar produtos');
         setProducts([]); // Clear products on error
       }
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   }, []);
@@ -783,7 +784,7 @@ export const usePDVCart = () => {
   const updateSplitInfo = useCallback((info: Partial<typeof splitInfo>) => {
     setSplitInfo(prev => ({ ...prev, ...info }));
   }, []);
-
+  
   return {
     items,
     discount,
