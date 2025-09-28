@@ -388,8 +388,26 @@ export const usePDVProducts = () => {
         original_price,
         image,
         has_complements,
-        ...validUpdates
+        display_order,
+        ...invalidProps
       } = updates as any;
+      
+      // Explicitly construct update object with only valid PDVProduct fields
+      const validUpdates: Partial<PDVProduct> = {};
+      
+      // Only include fields that exist in PDVProduct interface and pdv_products table
+      if (updates.code !== undefined) validUpdates.code = updates.code;
+      if (updates.name !== undefined) validUpdates.name = updates.name;
+      if (updates.category !== undefined) validUpdates.category = updates.category;
+      if (updates.is_weighable !== undefined) validUpdates.is_weighable = updates.is_weighable;
+      if (updates.unit_price !== undefined) validUpdates.unit_price = updates.unit_price;
+      if (updates.price_per_gram !== undefined) validUpdates.price_per_gram = updates.price_per_gram;
+      if (updates.image_url !== undefined) validUpdates.image_url = updates.image_url;
+      if (updates.stock_quantity !== undefined) validUpdates.stock_quantity = updates.stock_quantity;
+      if (updates.min_stock !== undefined) validUpdates.min_stock = updates.min_stock;
+      if (updates.is_active !== undefined) validUpdates.is_active = updates.is_active;
+      if (updates.barcode !== undefined) validUpdates.barcode = updates.barcode;
+      if (updates.description !== undefined) validUpdates.description = updates.description;
       
       const hasChanges = Object.keys(validUpdates).some(key => {
         return existingProduct[key] !== validUpdates[key];
